@@ -1,0 +1,8 @@
+Cross platform (eventually) video device access.
+
+Incremental development.
+  1 Most basic capture device
+  2 Expanded capture device
+  3 Audio capabilities
+  4 Radio cards?
+  5 Output capabilities?
