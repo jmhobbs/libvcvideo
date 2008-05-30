@@ -35,6 +35,7 @@ namespace vc {
 		if(-1 == ioctl(fd,VIDIOC_G_INPUT,&currentInput))
 			return false;
 
+		// Enumerate the inputs
 		for(int i = 0; i < MAX_INPUTS; i++) {
 			inputs[i].index = i;
 			if(-1 == ioctl(fd,VIDIOC_ENUMINPUT,&inputs[i]))
@@ -42,8 +43,19 @@ namespace vc {
 			++inputCount;
 		}
 
-		// Left off at tuners...
+		//! \todo Handle tuners...
 		// http://v4l2spec.bytesex.org/spec/x394.htm
+
+		//! \todo Handle input standards specs?
+		// http://v4l2spec.bytesex.org/spec/x448.htm
+
+		// Since we a re starting with USB cameras they set v4l_input std to 0
+		// If it isn't, we bail out.
+		if(0 != inputs[currentInput].std)
+			return false;
+
+		// Enumerate input controls
+		// http://v4l2spec.bytesex.org/spec/x542.htm
 
 		live = true;
 		return true;
