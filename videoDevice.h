@@ -1,6 +1,11 @@
 #ifndef VIDEODEVICE_H
 #define VIDEODEVICE_H
 
+#include <video/v4l2.h>
+#include <string>
+
+using std::string;
+
 namespace vc {
 
 	class videoDevice {
@@ -9,14 +14,14 @@ namespace vc {
 			videoDevice(string);
 			~videoDevice();
 
-			bool open();
+			void init();
 
 			string getCardName();
 
 			// Controls
 			int getBrightness();
 			void setBrightness(const int);
-			in getContrast();
+			int getContrast();
 			void setContrast(const int);
 
 		private:
@@ -26,7 +31,7 @@ namespace vc {
 
 			v4l2_capability capabilities;
 
-			// 6 is arbitrary magic number
+			// 6 is an arbitrary magic number
 			#define MAX_INPUTS 6
 			v4l2_input inputs[MAX_INPUTS];
 			int inputCount;

@@ -1,4 +1,4 @@
-#include <fctnl.h>
+#include <fcntl.h>
 
 #include "videoDevice.h"
 
@@ -12,20 +12,28 @@ namespace vc {
 			close(fd);
 	}
 
-	//! \todo Check error codes?
-	//! \todo Straighten this up, maybe break it up.
-	bool videoDevice::open () {
+
+	/*!
+		Initialize the device.
+
+		\todo Straighten this up, maybe break it up.
+		\todo Get better error strings from ioctl and stuff.
+
+		\throws string Descriptive error string.
+	*/
+	void videoDevice::init () {
 		if(live)
-			return true;
+			return;
 
 		fd = open(deviceName.c_str(),O_RDWR);
-		return false;
+		if(-1 == fd)
+			throw new string("Could not open device: "+deviceName);
 
 		if(-1 == ioctl(fd, VIDIOC_QUERYCAP, &capabilities))
-			return false;
+			throw new string("Could not get device capabilities.");
 
 		if!(capabilities.capabilities & V4L2_CAP_VIDEO_CAPTURE)
-			return false
+			throw new string("Device '"+deviceName+" not a video capture device.");
 
 		//! \todo Can we use V4L2_CAP_VIDEO_OVERLAY ?
 		//! \todo How about audio? V4L2_CAP_AUDIO
@@ -33,7 +41,7 @@ namespace vc {
 
 		// Check out the inputs on the card
 		if(-1 == ioctl(fd,VIDIOC_G_INPUT,&currentInput))
-			return false;
+			throw new string("Can't get the current input on the device '"+deviceName+"'.");
 
 		// Enumerate the inputs
 		for(int i = 0; i < MAX_INPUTS; i++) {
@@ -52,18 +60,26 @@ namespace vc {
 		// Since we a re starting with USB cameras they set v4l_input std to 0
 		// If it isn't, we bail out.
 		if(0 != inputs[currentInput].std)
-			return false;
+			throw new string("Not a USB web camera!");
 
 		// Enumerate input controls
 		// http://v4l2spec.bytesex.org/spec/x542.htm
 
 		live = true;
-		return true;
 	}
 
+	/*!
+		Get the card name
+
+		\throws string If device is not initialized.
+
+		\return The name of the card.
+	*/
 	string videoDevice::getCardName () {
-		if(live)
-			return capabilities.card;
+		if(!live)
+			throw new string("Device is not initialized.");
+
+		return capabilities.card;
 	}
 
 }

@@ -33,7 +33,7 @@ clean:
 .SUFFIXES : .cpp .o .h
 
 .cpp.o:
-	$(COMPILER) $(GTKCFLAGS) $(CURLCFLAGS) -c $< -o $@
+	$(COMPILER) -c $< -o $@
 
 gendeps:
 	@g++ -D_x86 -D_LINUX -MM *.cpp | sed 's/^\([a-zA-Z]\)/\n\1/' > dependency.mk
