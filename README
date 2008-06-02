@@ -1,8 +1,31 @@
-Cross platform (eventually) video device access.
+----------------------------------[README]--------------------------------------
 
-Incremental development.
-  1 Most basic capture device
-  2 Expanded capture device
-  3 Audio capabilities
-  4 Radio cards?
-  5 Output capabilities?
+libvcvideo is intended to be a simple, cross platform video library targeting the
+most amateur programmers and basic applications. The core targeted devices are
+USB webcams, hopefully with capabilities expanding over time to include tuner
+devices as well.
+
+Currently the library is linux compatible only.
+
+libvcvideo is released under the GNU Public License v3.
+
+To install or update the library, just run the install.sh script with root privileges.
+
+
+-------------------------------[DEPENDENCIES]-----------------------------------
+
+A modern kernel with v4l2.
+
+
+-----------------------------------[LINKS]--------------------------------------
+
+"libvcvideo" Project Site
+  - http://static.velvetcache.org/projects/libvcvideo/
+
+----------------------------------[CREDITS]-------------------------------------
+
+This library would not exist without the wonderful documentation of V4L2
+  - http://linuxtv.org/v4lwiki/index.php/Main_Page
+
+I was also inspired through the use of OpenCV
+  - http://opencvlibrary.sourceforge.net/

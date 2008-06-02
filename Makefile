@@ -24,7 +24,9 @@ COMPILER=$(CC) $(CFLAGS)
 
 # Targets
 lib: videoDevice.o
-	$(COMPILER) $< -o $@
+
+test: videoDevice.o vcvTest.o
+	$(COMPILER) videoDevice.o vcvTest.o -o $@
 
 clean:
 	@rm -f *.o
