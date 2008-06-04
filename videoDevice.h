@@ -19,6 +19,7 @@
 #ifndef VIDEODEVICE_H
 #define VIDEODEVICE_H
 
+#include <linux/videodev.h>
 #include <linux/videodev2.h>
 #include <string>
 
@@ -51,15 +52,22 @@ namespace vc {
 			void setIntegerControlValue(const vdIntegerControl, const int);
 
 		private:
+
+			void v2_init();
+			void v1_init();
+
 			string deviceName;
 			bool live; // Penultimate determinant of device status
 			int fd;
+			bool isV4L2; // If true, use v4l2 stuff.
 
-			v4l2_capability capabilities;
+			v4l2_capability v2_capabilities;
+			video_capability v1_capabilities;
 
 			// 6 is an arbitrary magic number
 			#define MAX_INPUTS 6
-			v4l2_input inputs[MAX_INPUTS];
+			v4l2_input v2_inputs[MAX_INPUTS];
+			video_channel v1_inputs[MAX_INPUTS];
 			int inputCount;
 			int currentInput;
 
@@ -69,6 +77,7 @@ namespace vc {
 			v4l2_queryctrl contrast;
 			v4l2_queryctrl saturation;
 			v4l2_queryctrl hue;
+			video_picture v1_controls;
 	};
 
 };

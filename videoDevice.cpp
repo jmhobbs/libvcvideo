@@ -19,12 +19,17 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#include <iostream>
+using std::cerr;
+using std::flush;
+using std::endl;
+
 #include "videoDevice.h"
 
 namespace vc {
 
 	videoDevice::videoDevice (string _deviceName) :
-	deviceName(_deviceName), live(false), fd(-1), inputCount(0) {}
+	deviceName(_deviceName), live(false), fd(-1), isV4L2(false), inputCount(0) {}
 
 	videoDevice::~videoDevice () {
 		if(fd != -1)
@@ -48,15 +53,36 @@ namespace vc {
 		if(-1 == fd)
 			throw new string("Could not open device: "+deviceName);
 
-		if(-1 == ioctl(fd, VIDIOC_QUERYCAP, &capabilities))
-			throw new string("Could not get device capabilities.");
+		if(-1 != ioctl(fd, VIDIOC_QUERYCAP, &v2_capabilities))
+			isV4L2 = true;
+		else if(-1 == ioctl(fd, VIDIOCGCAP, &v1_capabilities))
+			throw new string("Could not get device capabilities. Not a V4L or V4L2 device.");
 
-		if(!(capabilities.capabilities & V4L2_CAP_VIDEO_CAPTURE))
+		if(isV4L2) {
+			try {
+				v2_init();
+			}
+			catch(string * s) {
+				throw new string(*s);
+			}
+		}
+		else {
+			try {
+				v1_init();
+			}
+			catch(string * s) {
+				throw new string(*s);
+			}
+		}
+
+		live = true;
+	}
+
+	void videoDevice::v2_init () {
+		if(!(v2_capabilities.capabilities & V4L2_CAP_VIDEO_CAPTURE))
 			throw new string("Device '"+deviceName+" not a video capture device.");
 
 		//! \todo Can we use V4L2_CAP_VIDEO_OVERLAY ?
-		//! \todo How about audio? V4L2_CAP_AUDIO
-		//! \todo Rule out radios? V4L2_CAP_RADIO
 
 		// Check out the inputs on the card
 		if(-1 == ioctl(fd,VIDIOC_G_INPUT,&currentInput))
@@ -64,8 +90,8 @@ namespace vc {
 
 		// Enumerate the inputs
 		for(int i = 0; i < MAX_INPUTS; i++) {
-			inputs[i].index = i;
-			if(-1 == ioctl(fd,VIDIOC_ENUMINPUT,&inputs[i]))
+			v2_inputs[i].index = i;
+			if(-1 == ioctl(fd,VIDIOC_ENUMINPUT,&v2_inputs[i]))
 				break;
 			++inputCount;
 		}
@@ -76,9 +102,9 @@ namespace vc {
 		//! \todo Handle input standards specs?
 		// http://v4l2spec.bytesex.org/spec/x448.htm
 
-		// Since we a re starting with USB cameras they set v4l_input std to 0
+		// Since we a re starting with USB cameras they set v4l2_input std to 0
 		// If it isn't, we bail out.
-		if(0 != inputs[currentInput].std)
+		if(0 != v2_inputs[currentInput].std)
 			throw new string("Not a USB web camera.");
 
 		// Enumerate input controls
@@ -98,8 +124,28 @@ namespace vc {
 		hue.id = V4L2_CID_HUE;
 		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,hue))
 			throw new string("Could not get control value for hue.");
+	}
 
-		live = true;
+	void videoDevice::v1_init () {
+		if(v1_capabilities != VID_TYPE_CAPTURE)
+			throw new string("Device '"+deviceName+" not a video capture device.");
+
+		//! \todo How about VID_TYPE_OVERLAY?
+		//! \todo Need to handle VID_TYPE_SUBCAPTURE at some point.
+
+		// Check out the inputs ("channels") on the card
+		for(int i = 0; i < v1_capabilities.channels && i < MAX_INPUTS; i++) {
+			v1_inputs[i].channel = i;
+			if(-1 == ioctl(fd,VIDIOCGCHAN,&v1_inputs[i]))
+				break;
+			++inputCount;
+		}
+
+		// Set to first channel by default?
+		if(-1 == ioctl(fd,VIDIOCSCHAN,0))
+			throw new string("Can't set default channel.");
+
+		// http://www.linuxtv.org/downloads/video4linux/API/V4L1_API.html
 	}
 
 	/*!
@@ -290,7 +336,10 @@ namespace vc {
 		if(!live)
 			throw new string("Device is not initialized.");
 
-		return reinterpret_cast<const char *>(capabilities.card);
+		if(isV4L2)
+			return reinterpret_cast<const char *>(v2_capabilities.card);
+		else
+			return reinterpret_cast<const char *>(v1_capabilities.name);
 	}
 
 }
