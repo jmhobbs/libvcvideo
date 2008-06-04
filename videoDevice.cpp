@@ -51,27 +51,27 @@ namespace vc {
 
 		fd = open(deviceName.c_str(),O_RDWR);
 		if(-1 == fd)
-			throw new string("Could not open device: "+deviceName);
+			throw string("Could not open device: "+deviceName);
 
 		if(-1 != ioctl(fd, VIDIOC_QUERYCAP, &v2_capabilities))
 			isV4L2 = true;
 		else if(-1 == ioctl(fd, VIDIOCGCAP, &v1_capabilities))
-			throw new string("Could not get device capabilities. Not a V4L or V4L2 device.");
+			throw string("Could not get device capabilities. Not a V4L or V4L2 device.");
 
 		if(isV4L2) {
 			try {
 				v2_init();
 			}
-			catch(string * s) {
-				throw new string(*s);
+			catch(string s) {
+				throw string(s);
 			}
 		}
 		else {
 			try {
 				v1_init();
 			}
-			catch(string * s) {
-				throw new string(*s);
+			catch(string s) {
+				throw string(s);
 			}
 		}
 
@@ -80,13 +80,13 @@ namespace vc {
 
 	void videoDevice::v2_init () {
 		if(!(v2_capabilities.capabilities & V4L2_CAP_VIDEO_CAPTURE))
-			throw new string("Device '"+deviceName+" not a video capture device.");
+			throw string("Device '"+deviceName+" not a video capture device.");
 
 		//! \todo Can we use V4L2_CAP_VIDEO_OVERLAY ?
 
 		// Check out the inputs on the card
 		if(-1 == ioctl(fd,VIDIOC_G_INPUT,&currentInput))
-			throw new string("Can't get the current input on the device '"+deviceName+"'.");
+			throw string("Can't get the current input on the device '"+deviceName+"'.");
 
 		// Enumerate the inputs
 		for(int i = 0; i < MAX_INPUTS; i++) {
@@ -105,30 +105,30 @@ namespace vc {
 		// Since we a re starting with USB cameras they set v4l2_input std to 0
 		// If it isn't, we bail out.
 		if(0 != v2_inputs[currentInput].std)
-			throw new string("Not a USB web camera.");
+			throw string("Not a USB web camera.");
 
 		// Enumerate input controls
 		// http://v4l2spec.bytesex.org/spec/x542.htm
 		brightness.id = V4L2_CID_BRIGHTNESS;
 		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,brightness))
-			throw new string("Could not get control value for brightness.");
+			throw string("Could not get control value for brightness.");
 
 		contrast.id = V4L2_CID_CONTRAST;
 		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,contrast))
-			throw new string("Could not get control value for contrast.");
+			throw string("Could not get control value for contrast.");
 
 		saturation.id = V4L2_CID_SATURATION;
 		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,saturation))
-			throw new string("Could not get control value for saturation.");
+			throw string("Could not get control value for saturation.");
 
 		hue.id = V4L2_CID_HUE;
 		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,hue))
-			throw new string("Could not get control value for hue.");
+			throw string("Could not get control value for hue.");
 	}
 
 	void videoDevice::v1_init () {
-		if(v1_capabilities != VID_TYPE_CAPTURE)
-			throw new string("Device '"+deviceName+" not a video capture device.");
+		if(v1_capabilities.type != VID_TYPE_CAPTURE)
+			throw string("Device '"+deviceName+" not a video capture device.");
 
 		//! \todo How about VID_TYPE_OVERLAY?
 		//! \todo Need to handle VID_TYPE_SUBCAPTURE at some point.
@@ -143,7 +143,7 @@ namespace vc {
 
 		// Set to first channel by default?
 		if(-1 == ioctl(fd,VIDIOCSCHAN,0))
-			throw new string("Can't set default channel.");
+			throw string("Can't set default channel.");
 
 		// http://www.linuxtv.org/downloads/video4linux/API/V4L1_API.html
 	}
@@ -158,28 +158,28 @@ namespace vc {
 	*/
 	int videoDevice::getIntegerControlValue (const vdIntegerControl controlType) {
 		if(!live)
-			throw new string("Device is not initialized.");
+			throw string("Device is not initialized.");
 
 		v4l2_control get;
 
 		switch (controlType) {
 			case BRIGHTNESS:
 				if(brightness.flags & V4L2_CTRL_FLAG_DISABLED)
-					throw new string("Brightness control not used on this device.");
+					throw string("Brightness control not used on this device.");
 				get.id = V4L2_CID_BRIGHTNESS;
 				break;
 			case CONTRAST:
 				if(contrast.flags & V4L2_CTRL_FLAG_DISABLED)
-					throw new string("Contrast control not used on this device.");
+					throw string("Contrast control not used on this device.");
 				get.id = V4L2_CID_CONTRAST;
 				break;
 			default:
-				throw new string("Invalid integer control type.");
+				throw string("Invalid integer control type.");
 				break;
 		}
 
 		if(-1 == ioctl(fd,VIDIOC_G_CTRL,get))
-			throw new string("Could not get the value of the control.");
+			throw string("Could not get the value of the control.");
 
 		return get.value;
 	}
@@ -194,7 +194,7 @@ namespace vc {
 	*/
 	int videoDevice::getIntegerControlMinimum (const vdIntegerControl controlType) {
 		if(!live)
-			throw new string("Device is not initialized.");
+			throw string("Device is not initialized.");
 
 		v4l2_queryctrl temp;
 
@@ -206,12 +206,12 @@ namespace vc {
 				temp = contrast;
 				break;
 			default:
-				throw new string("Invalid integer control type.");
+				throw string("Invalid integer control type.");
 				break;
 		}
 
 		if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
-			throw new string("That control not used on this device.");
+			throw string("That control not used on this device.");
 
 		return temp.minimum;
 	}
@@ -226,7 +226,7 @@ namespace vc {
 	*/
 	int videoDevice::getIntegerControlMaximum (const vdIntegerControl controlType) {
 		if(!live)
-			throw new string("Device is not initialized.");
+			throw string("Device is not initialized.");
 
 		v4l2_queryctrl temp;
 
@@ -238,12 +238,12 @@ namespace vc {
 				temp = contrast;
 				break;
 			default:
-				throw new string("Invalid integer control type.");
+				throw string("Invalid integer control type.");
 				break;
 		}
 
 		if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
-			throw new string("That control not used on this device.");
+			throw string("That control not used on this device.");
 
 		return temp.maximum;
 	}
@@ -258,7 +258,7 @@ namespace vc {
 	*/
 	int videoDevice::getIntegerControlStep (const vdIntegerControl controlType) {
 		if(!live)
-			throw new string("Device is not initialized.");
+			throw string("Device is not initialized.");
 
 		v4l2_queryctrl temp;
 
@@ -270,12 +270,12 @@ namespace vc {
 				temp = contrast;
 				break;
 			default:
-				throw new string("Invalid integer control type.");
+				throw string("Invalid integer control type.");
 				break;
 		}
 
 		if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
-			throw new string("That control is not used on this device.");
+			throw string("That control is not used on this device.");
 
 		return temp.step;
 	}
@@ -290,7 +290,7 @@ namespace vc {
 	*/
 	void videoDevice::setIntegerControlValue (const vdIntegerControl controlType, const int value) {
 		if(!live)
-			throw new string("Device is not initialized.");
+			throw string("Device is not initialized.");
 
 		v4l2_queryctrl temp;
 		v4l2_control ctrl;
@@ -305,23 +305,23 @@ namespace vc {
 				ctrl.id = V4L2_CID_CONTRAST;
 				break;
 			default:
-				throw new string("Invalid integer control type.");
+				throw string("Invalid integer control type.");
 				break;
 		}
 
 		if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
-			throw new string("The control is not used on this device.");
+			throw string("The control is not used on this device.");
 
 		if(-1 == ioctl(fd,VIDIOC_G_CTRL,ctrl))
-			throw new string("Could not get the value of the control.");
+			throw string("Could not get the value of the control.");
 
 		if(temp.maximum < value || temp.minimum > value)
-			throw new string("New control value out of range.");
+			throw string("New control value out of range.");
 
 		ctrl.value = value;
 
 		if(-1 == ioctl(fd,VIDIOC_S_CTRL,ctrl))
-			throw new string("Could not set the value of the control.");
+			throw string("Could not set the value of the control.");
 
 	}
 
@@ -334,7 +334,7 @@ namespace vc {
 	*/
 	string videoDevice::getCardName () {
 		if(!live)
-			throw new string("Device is not initialized.");
+			throw string("Device is not initialized.");
 
 		if(isV4L2)
 			return reinterpret_cast<const char *>(v2_capabilities.card);

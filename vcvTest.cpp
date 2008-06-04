@@ -32,8 +32,8 @@ int main (int argc, char ** argv) {
 	try {
 		test.init();
 	}
-	catch(string * s) {
-		cout << "Init Failed: " << *s << endl;
+	catch(string s) {
+		cout << "Init Failed: " << s << endl;
 		exit(1);
 	}
 
@@ -43,8 +43,8 @@ int main (int argc, char ** argv) {
 		cout << "Brightness (min/max/cur): " << test.getIntegerControlMinimum(BRIGHTNESS) << "/"
 				 << test.getIntegerControlMaximum(BRIGHTNESS) << "/" << test.getIntegerControlValue(BRIGHTNESS) << endl;
 	}
-	catch(string * s) {
-		cout << "Brightness Information Failed: " << *s << endl;
+	catch(string s) {
+		cout << "Brightness Information Failed: " << s << endl;
 		exit(1);
 	}
 
