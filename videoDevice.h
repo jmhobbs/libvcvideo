@@ -27,6 +27,13 @@ using std::string;
 
 namespace vc {
 
+	typedef struct vdFrame {
+		void * buffer;
+		unsigned long bufferSize;
+		unsigned long height;
+		unsigned long width;
+	};
+
 	enum vdIntegerControl {
 		BRIGHTNESS,
 		CONTRAST,
@@ -42,9 +49,11 @@ namespace vc {
 
 			void init();
 
-			string getCardName();
+			void getFrame(const * vdFrame);
 
+			string getCardName();
 			// Controls
+			bool getIntegerControlUsed(const vdIntegerControl);
 			int getIntegerControlValue(const vdIntegerControl);
 			int getIntegerControlMinimum(const vdIntegerControl);
 			int getIntegerControlMaximum(const vdIntegerControl);
@@ -62,12 +71,10 @@ namespace vc {
 			bool isV4L2; // If true, use v4l2 stuff.
 
 			v4l2_capability v2_capabilities;
-			video_capability v1_capabilities;
 
 			// 6 is an arbitrary magic number
 			#define MAX_INPUTS 6
 			v4l2_input v2_inputs[MAX_INPUTS];
-			video_channel v1_inputs[MAX_INPUTS];
 			int inputCount;
 			int currentInput;
 
@@ -77,7 +84,13 @@ namespace vc {
 			v4l2_queryctrl contrast;
 			v4l2_queryctrl saturation;
 			v4l2_queryctrl hue;
+
+
+			// V4L1
+			video_capability v1_capabilities;
+			video_channel v1_inputs[MAX_INPUTS];
 			video_picture v1_controls;
+			video_window v1_window;
 	};
 
 };

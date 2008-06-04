@@ -36,7 +36,9 @@ namespace vc {
 			close(fd);
 	}
 
-
+	/////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////// Setup /////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 	/*!
 		Initialize the device.
 
@@ -78,6 +80,11 @@ namespace vc {
 		live = true;
 	}
 
+	/*!
+		Initialize V4L2 devices.
+
+		\throw string On any initialization error.
+	*/
 	void videoDevice::v2_init () {
 		if(!(v2_capabilities.capabilities & V4L2_CAP_VIDEO_CAPTURE))
 			throw string("Device '"+deviceName+" not a video capture device.");
@@ -124,9 +131,18 @@ namespace vc {
 		hue.id = V4L2_CID_HUE;
 		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,hue))
 			throw string("Could not get control value for hue.");
+
+		//! \todo Finish this.
 	}
 
+	/*!
+		Initialize V4L1 devices.
+
+		\throw string On any failure to initialize.
+	*/
 	void videoDevice::v1_init () {
+		// API Ref: http://www.linuxtv.org/downloads/video4linux/API/V4L1_API.html
+
 		if(v1_capabilities.type != VID_TYPE_CAPTURE)
 			throw string("Device '"+deviceName+" not a video capture device.");
 
@@ -145,7 +161,74 @@ namespace vc {
 		if(-1 == ioctl(fd,VIDIOCSCHAN,0))
 			throw string("Can't set default channel.");
 
-		// http://www.linuxtv.org/downloads/video4linux/API/V4L1_API.html
+		if(v1_inputs[0].type != VIDEO_TYPE_CAMERA)
+			throw string("This is a V4L1 TV device. We don't handle those yet (they have tuners!).");
+
+		// Get the picture information
+		if(-1 == ioctl(fd,VIDIOCGPICT,&v1_controls))
+			throw new string("Can't get image properties.");
+
+		// Default with the biggest size capture
+		v1_window.width = v1_capabilities.maxwidth;
+		v1_window.height = v1_capabilities.maxheight;
+		if(-1 == ioctl(fd,VIDIOCSWIN,&v1_window))
+			throw string("Tried to set to it's maximum size, but it failed.");
+		if(-1 == ioctl(fd,VIDIOCGWIN,&v1_window))
+			throw string("Could not get the viewing window.");
+
+		// Check compatible palette and calculate buffer size.
+		//! \todo Split this function up into common chunks.
+
+	}
+
+
+	/////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////// Controls ///////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+
+	/*!
+		Gets whether the control is used on the device.
+
+		\throws string If device not started or an invalid control is specified.
+
+		\param controlType The type of integer control to check.
+		\return True if used.
+	*/
+	bool videoDevice::getIntegerControlUsed(const vdIntegerControl controlType) {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		if(isV4L2) {
+			switch (controlType) {
+				case BRIGHTNESS:
+					return !(brightness.flags & V4L2_CTRL_FLAG_DISABLED);
+				case CONTRAST:
+					return !(contrast.flags & V4L2_CTRL_FLAG_DISABLED);
+				case SATURATION:
+					return !(saturation.flags & V4L2_CTRL_FLAG_DISABLED);
+				case HUE:
+					return !(hue.flags & V4L2_CTRL_FLAG_DISABLED);
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+		}
+		else {
+			switch (controlType) {
+				case BRIGHTNESS:
+				case CONTRAST:
+					return true;
+				case SATURATION:
+					return false; //! \todo Is saturation == colour?
+				case HUE:
+					return v1_controls.palette != VIDEO_PALETTE_GREY;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+		}
+
+		return false;
 	}
 
 	/*!
@@ -160,28 +243,57 @@ namespace vc {
 		if(!live)
 			throw string("Device is not initialized.");
 
-		v4l2_control get;
+		if(isV4L2) {
+			v4l2_control get;
 
-		switch (controlType) {
-			case BRIGHTNESS:
-				if(brightness.flags & V4L2_CTRL_FLAG_DISABLED)
-					throw string("Brightness control not used on this device.");
-				get.id = V4L2_CID_BRIGHTNESS;
-				break;
-			case CONTRAST:
-				if(contrast.flags & V4L2_CTRL_FLAG_DISABLED)
-					throw string("Contrast control not used on this device.");
-				get.id = V4L2_CID_CONTRAST;
-				break;
-			default:
-				throw string("Invalid integer control type.");
-				break;
+			switch (controlType) {
+				case BRIGHTNESS:
+					if(brightness.flags & V4L2_CTRL_FLAG_DISABLED)
+						throw string("Brightness control not used on this device.");
+					get.id = V4L2_CID_BRIGHTNESS;
+					break;
+				case CONTRAST:
+					if(contrast.flags & V4L2_CTRL_FLAG_DISABLED)
+						throw string("Contrast control not used on this device.");
+					get.id = V4L2_CID_CONTRAST;
+					break;
+				case SATURATION:
+					if(saturation.flags & V4L2_CTRL_FLAG_DISABLED)
+						throw new string("Saturation control not used on this device.");
+					get.id = V4L2_CID_SATURATION;
+					break;
+				case HUE:
+					if(hue.flags & V4L2_CTRL_FLAG_DISABLED)
+						throw new string("Hue control not used on this device.");
+					get.id = V4L2_CID_HUE;
+					break;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+
+			if(-1 == ioctl(fd,VIDIOC_G_CTRL,get))
+				throw string("Could not get the value of the control.");
+
+			return get.value;
 		}
-
-		if(-1 == ioctl(fd,VIDIOC_G_CTRL,get))
-			throw string("Could not get the value of the control.");
-
-		return get.value;
+		else {
+			switch (controlType) {
+				case BRIGHTNESS:
+					return v1_controls.brightness;
+				case CONTRAST:
+					return v1_controls.contrast;
+				case SATURATION:
+					throw string("V4L1 does not support saturation.");
+				case HUE:
+					if(!getIntegerControlUsed(HUE))
+						throw string("Hue control not used on this device.");
+					return v1_controls.hue;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+		}
 	}
 
 	/*!
@@ -196,24 +308,42 @@ namespace vc {
 		if(!live)
 			throw string("Device is not initialized.");
 
-		v4l2_queryctrl temp;
+		if(isV4L2) {
+			v4l2_queryctrl temp;
 
-		switch (controlType) {
-			case BRIGHTNESS:
-				temp = brightness;
-				break;
-			case CONTRAST:
-				temp = contrast;
-				break;
-			default:
-				throw string("Invalid integer control type.");
-				break;
+			switch (controlType) {
+				case BRIGHTNESS:
+					temp = brightness;
+					break;
+				case CONTRAST:
+					temp = contrast;
+					break;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+
+			if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
+				throw string("That control not used on this device.");
+
+			return temp.minimum;
 		}
-
-		if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
-			throw string("That control not used on this device.");
-
-		return temp.minimum;
+		else {
+			switch (controlType) {
+				case BRIGHTNESS:
+				case CONTRAST:
+					return 0;
+				case SATURATION:
+					throw string("V4L1 does not support saturation.");
+				case HUE:
+					if(!getIntegerControlUsed(HUE))
+						throw string("Hue control not used on this device.");
+					return 0;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+		}
 	}
 
 	/*!
@@ -228,24 +358,42 @@ namespace vc {
 		if(!live)
 			throw string("Device is not initialized.");
 
-		v4l2_queryctrl temp;
+		if(isV4L2) {
+			v4l2_queryctrl temp;
 
-		switch (controlType) {
-			case BRIGHTNESS:
-				temp = brightness;
-				break;
-			case CONTRAST:
-				temp = contrast;
-				break;
-			default:
-				throw string("Invalid integer control type.");
-				break;
+			switch (controlType) {
+				case BRIGHTNESS:
+					temp = brightness;
+					break;
+				case CONTRAST:
+					temp = contrast;
+					break;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+
+			if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
+				throw string("That control not used on this device.");
+
+			return temp.maximum;
 		}
-
-		if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
-			throw string("That control not used on this device.");
-
-		return temp.maximum;
+		else {
+			switch (controlType) {
+				case BRIGHTNESS:
+				case CONTRAST:
+					return 65535;
+				case SATURATION:
+					throw string("V4L1 does not support saturation.");
+				case HUE:
+					if(!getIntegerControlUsed(HUE))
+						throw string("Hue control not used on this device.");
+					return 65535;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+		}
 	}
 
 	/*!
@@ -259,6 +407,9 @@ namespace vc {
 	int videoDevice::getIntegerControlStep (const vdIntegerControl controlType) {
 		if(!live)
 			throw string("Device is not initialized.");
+
+		if(!isV4L2)
+			return 1;
 
 		v4l2_queryctrl temp;
 
