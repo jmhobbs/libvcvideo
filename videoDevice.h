@@ -49,7 +49,7 @@ namespace vc {
 
 			void init();
 
-			void getFrame(const * vdFrame);
+			void getFrame(vdFrame *);
 
 			string getCardName();
 			// Controls

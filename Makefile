@@ -19,7 +19,7 @@
 
 # Compiler setup
 CC=g++
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g -DVCVIDEO_DEBUG
 COMPILER=$(CC) $(CFLAGS)
 
 # Targets

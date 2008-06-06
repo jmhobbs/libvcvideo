@@ -19,10 +19,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include <iostream>
-using std::cerr;
-using std::flush;
-using std::endl;
+#ifdef VCVIDEO_DEBUG
+	#include <iostream>
+	using std::cerr;
+	using std::flush;
+	using std::endl;
+#endif
 
 #include "videoDevice.h"
 
@@ -141,25 +143,48 @@ namespace vc {
 		\throw string On any failure to initialize.
 	*/
 	void videoDevice::v1_init () {
-		// API Ref: http://www.linuxtv.org/downloads/video4linux/API/V4L1_API.html
 
 		if(v1_capabilities.type != VID_TYPE_CAPTURE)
 			throw string("Device '"+deviceName+" not a video capture device.");
 
+		#ifdef VCVIDEO_DEBUG
+		cerr << "----[V4L1 Device Found]---------------------------" << endl;
+		cerr << " Name       : " << v1_capabilities.name << endl;
+		cerr << " Channels   : " << v1_capabilities.channels << endl;
+		cerr << " Max Height : " << v1_capabilities.maxheight << endl;
+		cerr << " Max Width  : " << v1_capabilities.maxwidth << endl;
+		cerr << " Min Height : " << v1_capabilities.minheight << endl;
+		cerr << " Min Width  : " << v1_capabilities.minwidth << endl;
+		cerr << "--------------------------------------------------\n" << endl;
+		#endif
+
 		//! \todo How about VID_TYPE_OVERLAY?
 		//! \todo Need to handle VID_TYPE_SUBCAPTURE at some point.
 
+		#ifdef VCVIDEO_DEBUG
+		cerr << "----[Enumerate Channels]--------------------------" << endl;
+		#endif
 		// Check out the inputs ("channels") on the card
 		for(int i = 0; i < v1_capabilities.channels && i < MAX_INPUTS; i++) {
 			v1_inputs[i].channel = i;
 			if(-1 == ioctl(fd,VIDIOCGCHAN,&v1_inputs[i]))
 				break;
 			++inputCount;
+			#ifdef VCVIDEO_DEBUG
+			cerr << "  + Channel #" << i << endl;
+			cerr << "    - Number : " << v1_inputs[i].channel << endl;
+			cerr << "    - Name   : " << v1_inputs[i].name << endl;
+			cerr << "    - Tuners : " << v1_inputs[i].tuners << endl;
+			#endif
 		}
+		#ifdef VCVIDEO_DEBUG
+		cerr << "--------------------------------------------------\n" << endl;
+		#endif
 
 		// Set to first channel by default?
-		if(-1 == ioctl(fd,VIDIOCSCHAN,0))
-			throw string("Can't set default channel.");
+		if(v1_capabilities.channels > 1)
+			if(-1 == ioctl(fd,VIDIOCSCHAN,0))
+				throw string("Can't set default channel.");
 
 		if(v1_inputs[0].type != VIDEO_TYPE_CAMERA)
 			throw string("This is a V4L1 TV device. We don't handle those yet (they have tuners!).");
@@ -167,6 +192,17 @@ namespace vc {
 		// Get the picture information
 		if(-1 == ioctl(fd,VIDIOCGPICT,&v1_controls))
 			throw new string("Can't get image properties.");
+
+		#ifdef VCVIDEO_DEBUG
+		cerr << "----[Image Properties]----------------------------" << endl;
+		cerr << " Brightness: " << v1_controls.brightness << endl;
+		cerr << " Hue: " << v1_controls.hue << endl;
+		cerr << " Color: " << v1_controls.colour << endl;
+		cerr << " Contrast: " << v1_controls.contrast << endl;
+		cerr << " Whiteness: " << v1_controls.whiteness << endl;
+		cerr << " Depth: "  << v1_controls.depth << endl;
+		cerr << "--------------------------------------------------\n" << endl;
+		#endif
 
 		// Default with the biggest size capture
 		v1_window.width = v1_capabilities.maxwidth;
@@ -181,6 +217,17 @@ namespace vc {
 
 	}
 
+	/////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////// Access ////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+
+	void videoDevice::getFrame (vdFrame * frame) {
+		if(!live)
+			throw string("Device not initialized.");
+
+		frame->width = v1_window.width;
+		frame->height = v1_window.height;
+	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Controls ///////////////////////////////////
