@@ -93,17 +93,35 @@ namespace vc {
 
 		//! \todo Can we use V4L2_CAP_VIDEO_OVERLAY ?
 
+		#ifdef VCVIDEO_DEBUG
+		cerr << "----[V4L2 Device Found]---------------------------" << endl;
+		cerr << " Name     : " << v2_capabilities.card << endl;
+		cerr << " Driver   : " << v2_capabilities.driver << " v." << v2_capabilities.version endl;
+		cerr << " Location : " << v2_capabilities.bus_info << endl;
+		cerr << "--------------------------------------------------\n" << endl;
+		#endif
+
 		// Check out the inputs on the card
 		if(-1 == ioctl(fd,VIDIOC_G_INPUT,&currentInput))
 			throw string("Can't get the current input on the device '"+deviceName+"'.");
 
-		// Enumerate the inputs
+		#ifdef VCVIDEO_DEBUG
+		cerr << "----[Enumerate Inputs]----------------------------" << endl;
+		#endif
 		for(int i = 0; i < MAX_INPUTS; i++) {
 			v2_inputs[i].index = i;
 			if(-1 == ioctl(fd,VIDIOC_ENUMINPUT,&v2_inputs[i]))
 				break;
 			++inputCount;
+			#ifdef VCVIDEO_DEBUG
+			cerr << "  + Input #" << i << endl;
+			cerr << "    - Name : " << v2_inputs[i].name << endl;
+			cerr << "    - Type : " << ((v2_init[i].type & V4L2_INPUT_TYPE_TUNER) ? "Tuner" : "Camera") << endl;
+			#endif
 		}
+		#ifdef VCVIDEO_DEBUG
+		cerr << "--------------------------------------------------\n" << endl;
+		#endif
 
 		//! \todo Handle tuners...
 		// http://v4l2spec.bytesex.org/spec/x394.htm
