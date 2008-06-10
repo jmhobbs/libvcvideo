@@ -65,6 +65,8 @@ namespace vc {
 			void v2_init();
 			void v1_init();
 
+			string v1_paletteName (int);
+
 			string deviceName;
 			bool live; // Penultimate determinant of device status
 			int fd;

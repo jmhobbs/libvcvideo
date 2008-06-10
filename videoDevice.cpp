@@ -96,7 +96,7 @@ namespace vc {
 		#ifdef VCVIDEO_DEBUG
 		cerr << "----[V4L2 Device Found]---------------------------" << endl;
 		cerr << " Name     : " << v2_capabilities.card << endl;
-		cerr << " Driver   : " << v2_capabilities.driver << " v." << v2_capabilities.version endl;
+		cerr << " Driver   : " << v2_capabilities.driver << " v." << v2_capabilities.version << endl;
 		cerr << " Location : " << v2_capabilities.bus_info << endl;
 		cerr << "--------------------------------------------------\n" << endl;
 		#endif
@@ -116,7 +116,7 @@ namespace vc {
 			#ifdef VCVIDEO_DEBUG
 			cerr << "  + Input #" << i << endl;
 			cerr << "    - Name : " << v2_inputs[i].name << endl;
-			cerr << "    - Type : " << ((v2_init[i].type & V4L2_INPUT_TYPE_TUNER) ? "Tuner" : "Camera") << endl;
+			cerr << "    - Type : " << ((v2_inputs[i].type & V4L2_INPUT_TYPE_TUNER) ? "Tuner" : "Camera") << endl;
 			#endif
 		}
 		#ifdef VCVIDEO_DEBUG
@@ -221,7 +221,7 @@ namespace vc {
 		cerr << " Depth: "  << v1_controls.depth << endl;
 		cerr << "--------------------------------------------------\n" << endl;
 		#endif
-
+/*
 		// Default with the biggest size capture
 		v1_window.width = v1_capabilities.maxwidth;
 		v1_window.height = v1_capabilities.maxheight;
@@ -229,8 +229,14 @@ namespace vc {
 			throw string("Tried to set to it's maximum size, but it failed.");
 		if(-1 == ioctl(fd,VIDIOCGWIN,&v1_window))
 			throw string("Could not get the viewing window.");
-
+*/
 		// Check compatible palette and calculate buffer size.
+		#ifdef VCVIDEO_DEBUG
+		cerr << v1_paletteName(v1_controls.palette) << endl;
+		#endif
+
+
+
 		//! \todo Split this function up into common chunks.
 
 	}
@@ -556,6 +562,26 @@ namespace vc {
 			return reinterpret_cast<const char *>(v2_capabilities.card);
 		else
 			return reinterpret_cast<const char *>(v1_capabilities.name);
+	}
+
+	string videoDevice::v1_paletteName (int p) {
+		switch (p) {
+			case VIDEO_PALETTE_GREY: return "VIDEO_PALETTE_GREY";
+			case VIDEO_PALETTE_HI240: return "VIDEO_PALETTE_HI240";
+			case VIDEO_PALETTE_RGB565: return "VIDEO_PALETTE_RGB565";
+			case VIDEO_PALETTE_RGB555: return "VIDEO_PALETTE_RGB555";
+			case VIDEO_PALETTE_RGB24: return "VIDEO_PALETTE_RGB24";
+			case VIDEO_PALETTE_RGB32: return "VIDEO_PALETTE_RGB32";
+			case VIDEO_PALETTE_YUV422: return "VIDEO_PALETTE_YUV422";
+			case VIDEO_PALETTE_YUYV: return "VIDEO_PALETTE_YUYV";
+			case VIDEO_PALETTE_UYVY: return "VIDEO_PALETTE_UYVY";
+			case VIDEO_PALETTE_YUV420: return "VIDEO_PALETTE_YUV420";
+			case VIDEO_PALETTE_YUV411: return "VIDEO_PALETTE_YUV411";
+			case VIDEO_PALETTE_RAW: return "VIDEO_PALETTE_RAW";
+			case VIDEO_PALETTE_YUV422P: return "VIDEO_PALETTE_YUV422P";
+			case VIDEO_PALETTE_YUV411P: return "VIDEO_PALETTE_YUV411P";
+			default: return "Invalid V4L1 Palette";
+		}
 	}
 
 }
