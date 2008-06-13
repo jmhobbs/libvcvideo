@@ -22,8 +22,11 @@
 #include <linux/videodev.h>
 #include <linux/videodev2.h>
 #include <string>
+#include <vector>
 
 using std::string;
+using std::vector;
+using std::pair;
 
 namespace vc {
 
@@ -49,7 +52,7 @@ namespace vc {
 
 			void init();
 
-			void getFrame(vdFrame *);
+			void getFrame(vdFrame &);
 
 			string getCardName();
 			// Controls
@@ -60,12 +63,16 @@ namespace vc {
 			int getIntegerControlStep(const vdIntegerControl);
 			void setIntegerControlValue(const vdIntegerControl, const int);
 
+			bool setSize(unsigned int, unsigned int);
+
 		private:
 
 			void v2_init();
 			void v1_init();
 
 			string v1_paletteName (int);
+
+			void setBufferSize ();
 
 			string deviceName;
 			bool live; // Penultimate determinant of device status
@@ -87,12 +94,14 @@ namespace vc {
 			v4l2_queryctrl saturation;
 			v4l2_queryctrl hue;
 
-
 			// V4L1
 			video_capability v1_capabilities;
 			video_channel v1_inputs[MAX_INPUTS];
 			video_picture v1_controls;
 			video_window v1_window;
+
+			vector < pair <int,int> > capableSizes;
+			unsigned int bufferSize;
 	};
 
 };

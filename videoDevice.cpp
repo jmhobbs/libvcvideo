@@ -153,6 +153,7 @@ namespace vc {
 			throw string("Could not get control value for hue.");
 
 		//! \todo Finish this.
+		throw string("V4L2 Not yet supported.");
 	}
 
 	/*!
@@ -205,7 +206,7 @@ namespace vc {
 				throw string("Can't set default channel.");
 
 		if(v1_inputs[0].type != VIDEO_TYPE_CAMERA)
-			throw string("This is a V4L1 TV device. We don't handle those yet (they have tuners!).");
+			throw string("This is a V4L1 TV device. We don't handle those yet (They have tuners!).");
 
 		// Get the picture information
 		if(-1 == ioctl(fd,VIDIOCGPICT,&v1_controls))
@@ -213,27 +214,51 @@ namespace vc {
 
 		#ifdef VCVIDEO_DEBUG
 		cerr << "----[Image Properties]----------------------------" << endl;
-		cerr << " Brightness: " << v1_controls.brightness << endl;
-		cerr << " Hue: " << v1_controls.hue << endl;
-		cerr << " Color: " << v1_controls.colour << endl;
-		cerr << " Contrast: " << v1_controls.contrast << endl;
-		cerr << " Whiteness: " << v1_controls.whiteness << endl;
-		cerr << " Depth: "  << v1_controls.depth << endl;
+		cerr << " Brightness : " << v1_controls.brightness << endl;
+		cerr << " Hue        : " << v1_controls.hue << endl;
+		cerr << " Color      : " << v1_controls.colour << endl;
+		cerr << " Contrast   : " << v1_controls.contrast << endl;
+		cerr << " Whiteness  : " << v1_controls.whiteness << endl;
+		cerr << " Depth      : " << v1_controls.depth << endl;
+		cerr << " Palette    : " << v1_paletteName(v1_controls.palette) << endl;
 		cerr << "--------------------------------------------------\n" << endl;
 		#endif
-/*
-		// Default with the biggest size capture
-		v1_window.width = v1_capabilities.maxwidth;
-		v1_window.height = v1_capabilities.maxheight;
-		if(-1 == ioctl(fd,VIDIOCSWIN,&v1_window))
-			throw string("Tried to set to it's maximum size, but it failed.");
+
 		if(-1 == ioctl(fd,VIDIOCGWIN,&v1_window))
 			throw string("Could not get the viewing window.");
-*/
-		// Check compatible palette and calculate buffer size.
+
 		#ifdef VCVIDEO_DEBUG
-		cerr << v1_paletteName(v1_controls.palette) << endl;
+		cerr << "----[Video Sizes]---------------------------------" << endl;
 		#endif
+		// This is from gspca stuff, better method available?
+		int sizes[14] = {640,480,384,288,352,288,320,240,192,144,176,144,160,120};
+		for(int j = 0; j < 13; j++) {
+			if(sizes[j] > v1_capabilities.maxwidth)
+				continue;
+			if(sizes[j] < v1_capabilities.minwidth)
+				break;
+
+			v1_window.width = sizes[j];
+			v1_window.height = sizes[j+1];
+			if(-1 != ioctl(fd,VIDIOCSWIN,&v1_window)) {
+				#ifdef VCVIDEO_DEBUG
+				cerr << "Found: " << sizes[j] << "x" << sizes[j+1] << endl;
+				#endif
+				capableSizes.push_back(pair<int,int>(sizes[j],sizes[j+1]));
+			}
+		}
+		#ifdef VCVIDEO_DEBUG
+		cerr << "--------------------------------------------------\n" << endl;
+		#endif
+
+		try {
+			setSize(v1_capabilities.maxwidth, v1_capabilities.maxheight);
+		}
+		catch (string s) {
+			throw s;
+		}
+
+		setBufferSize();
 
 
 
@@ -245,12 +270,19 @@ namespace vc {
 	///////////////////////////////// Access ////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
 
-	void videoDevice::getFrame (vdFrame * frame) {
+	void videoDevice::getFrame (vdFrame & frame) {
 		if(!live)
 			throw string("Device not initialized.");
 
-		frame->width = v1_window.width;
-		frame->height = v1_window.height;
+		if(isV4L2) {
+			throw string("V4L2 Not yet supported.");
+		}
+		else {
+			frame.width = v1_window.width;
+			frame.height = v1_window.height;
+			//! \todo Set buffer size somewhere else and base it on palette.
+			frame.bufferSize = bufferSize;
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -582,6 +614,22 @@ namespace vc {
 			case VIDEO_PALETTE_YUV411P: return "VIDEO_PALETTE_YUV411P";
 			default: return "Invalid V4L1 Palette";
 		}
+	}
+
+	bool videoDevice::setSize (unsigned int width, unsigned int height) {
+		// Default with the biggest size capture
+		v1_window.width = width;
+		v1_window.height = height;
+		if(-1 == ioctl(fd,VIDIOCSWIN,&v1_window))
+			return false;
+		if(-1 == ioctl(fd,VIDIOCGWIN,&v1_window))
+			return false;
+
+		return (v1_window.width == width && v1_window.height == height);
+	}
+
+	void videoDevice::setBufferSize () {
+		bufferSize = (v1_controls.depth/8)*v1_window.height*v1_window.width;
 	}
 
 }

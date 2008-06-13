@@ -48,5 +48,19 @@ int main (int argc, char ** argv) {
 		exit(1);
 	}
 
+	vdFrame tFrame;
+
+	try {
+		test.getFrame(tFrame);
+		cout << "Got frame:" << endl;
+		cout << "\tWidth:       " << tFrame.width << endl;
+		cout << "\tHeight:      " << tFrame.height << endl;
+		cout << "\tBuffer size: " << tFrame.bufferSize << endl;
+	}
+	catch(string s) {
+		cout << "Failed to get frame: " << s << endl;
+		exit(1);
+	}
+
 	return 0;
 }
