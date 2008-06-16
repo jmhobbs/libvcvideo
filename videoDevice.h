@@ -63,9 +63,13 @@ namespace vc {
 			int getIntegerControlMaximum(const vdIntegerControl);
 			int getIntegerControlStep(const vdIntegerControl);
 			void setIntegerControlValue(const vdIntegerControl, const int);
+			static string getIntegerControlString(const vdIntegerControl);
+			vector <vdIntegerControl> getValidIntegerControls();
 
 			bool setDimensions(unsigned int, unsigned int);
 			vector < pair <int,int> > getDimensions();
+
+
 
 		private:
 

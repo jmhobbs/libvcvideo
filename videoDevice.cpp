@@ -271,6 +271,15 @@ namespace vc {
 	///////////////////////////////// Access ////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
 
+	/*!
+		Get a frame from the device.
+
+		\todo V4L2 Implementation.
+
+		\throws string If device is not initialized or it is a V4L2 device.
+
+		\param frame The vdFrame struct to store into.
+	*/
 	void videoDevice::getFrame (vdFrame & frame) {
 		if(!live)
 			throw string("Device not initialized.");
@@ -648,11 +657,10 @@ namespace vc {
 		\todo Palette based?
 	*/
 	void videoDevice::setBufferSize () {
-		if(isV4L2) {
+		if(isV4L2)
 			throw string("V4L2 Not supported yet.");
-		}
-		else
-			bufferSize = (v1_controls.depth/8)*v1_window.height*v1_window.width;
+
+		bufferSize = (v1_controls.depth/8)*v1_window.height*v1_window.width;
 	}
 
 	/*!
@@ -667,6 +675,33 @@ namespace vc {
 			throw string("Device is not initialized.");
 
 		return capableDimensions;
+	}
+
+	string videoDevice::getIntegerControlString (const vdIntegerControl control) {
+		switch(control) {
+			case BRIGHTNESS: return "Brightness";
+			case CONTRAST: return "Contrast";
+			case SATURATION: return "Saturation";
+			case HUE: return "Hue";
+			default: throw string ("Invalid vdIntegerControl type.");
+		}
+	}
+
+	vector <vdIntegerControl> videoDevice::getValidIntegerControls () {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		if(isV4L2)
+			throw string("V4L2 Not supported yet.");
+
+		vector <vdIntegerControl> toReturn;
+
+		try { if(getIntegerControlUsed(BRIGHTNESS)) toReturn.push_back(BRIGHTNESS); } catch (string s) {}
+		try { if(getIntegerControlUsed(CONTRAST)) toReturn.push_back(CONTRAST); } catch (string s) {}
+		try { if(getIntegerControlUsed(SATURATION)) toReturn.push_back(SATURATION); } catch (string s) {}
+		try { if(getIntegerControlUsed(HUE)) toReturn.push_back(HUE); } catch (string s) {}
+
+		return toReturn;
 	}
 
 }
