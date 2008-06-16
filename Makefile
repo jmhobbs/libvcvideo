@@ -21,6 +21,7 @@
 CC=g++
 CFLAGS=-Wall -g -DVCVIDEO_DEBUG
 COMPILER=$(CC) $(CFLAGS)
+MAGICKFLAGS = `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
 
 # Targets
 lib: videoDevice.o
@@ -28,8 +29,13 @@ lib: videoDevice.o
 test: videoDevice.o vcvTest.o
 	$(COMPILER) videoDevice.o vcvTest.o -o $@
 
+testMagick: videoDevice.o vcvTest.cpp
+	$(COMPILER) $(MAGICKFLAGS) -DHAVE_MAGICK videoDevice.o vcvTest.cpp -o $@
+
 clean:
 	@rm -f *.o
+	@rm -f test
+	@rm -f testMagick
 
 # Object targets
 .SUFFIXES : .cpp .o .h

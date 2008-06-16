@@ -244,7 +244,7 @@ namespace vc {
 				#ifdef VCVIDEO_DEBUG
 				cerr << "Found: " << sizes[j] << "x" << sizes[j+1] << endl;
 				#endif
-				capableSizes.push_back(pair<int,int>(sizes[j],sizes[j+1]));
+				capableDimensions.push_back(pair<int,int>(sizes[j],sizes[j+1]));
 			}
 		}
 		#ifdef VCVIDEO_DEBUG
@@ -252,7 +252,8 @@ namespace vc {
 		#endif
 
 		try {
-			setSize(v1_capabilities.maxwidth, v1_capabilities.maxheight);
+			if(!setDimensions(v1_capabilities.maxwidth, v1_capabilities.maxheight))
+				throw string ("Dimensions weren't set to desired size.");
 		}
 		catch (string s) {
 			throw s;
@@ -280,6 +281,7 @@ namespace vc {
 		else {
 			frame.width = v1_window.width;
 			frame.height = v1_window.height;
+			frame.depth = v1_controls.depth;
 			//! \todo Set buffer size somewhere else and base it on palette.
 			frame.bufferSize = bufferSize;
 		}
@@ -616,20 +618,55 @@ namespace vc {
 		}
 	}
 
-	bool videoDevice::setSize (unsigned int width, unsigned int height) {
-		// Default with the biggest size capture
-		v1_window.width = width;
-		v1_window.height = height;
-		if(-1 == ioctl(fd,VIDIOCSWIN,&v1_window))
-			return false;
-		if(-1 == ioctl(fd,VIDIOCGWIN,&v1_window))
-			return false;
+	/*!
+		Attempts to set the device to the specified dimensions.
+	*/
+	bool videoDevice::setDimensions (unsigned int width, unsigned int height) {
+		if(isV4L2) {
+			throw string("V4L2 Not supported yet.");
+		}
+		else {
+			// Default with the biggest size capture
+			v1_window.width = width;
+			v1_window.height = height;
+			if(-1 == ioctl(fd,VIDIOCSWIN,&v1_window))
+				return false;
+			if(-1 == ioctl(fd,VIDIOCGWIN,&v1_window))
+				return false;
 
-		return (v1_window.width == width && v1_window.height == height);
+			return (v1_window.width == width && v1_window.height == height);
+		}
 	}
 
+	/*!
+		Set the buffer size for frames.  This should change on capture size change,
+		capture mode change.
+
+		\throws string If this is a V4L2 device, we don't have an implementation yet.
+
+		\todo V4L2 implementation.
+		\todo Palette based?
+	*/
 	void videoDevice::setBufferSize () {
-		bufferSize = (v1_controls.depth/8)*v1_window.height*v1_window.width;
+		if(isV4L2) {
+			throw string("V4L2 Not supported yet.");
+		}
+		else
+			bufferSize = (v1_controls.depth/8)*v1_window.height*v1_window.width;
+	}
+
+	/*!
+		Get the dimensions that the device is capable of capturing in.
+
+		\throws string If device is not initialized.
+
+		\return A vector of pairs of dimensions, pair[0] is width, pair[1] is height.
+	*/
+	vector < pair <int,int> > videoDevice::getDimensions () {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		return capableDimensions;
 	}
 
 }

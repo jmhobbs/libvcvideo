@@ -35,6 +35,7 @@ namespace vc {
 		unsigned long bufferSize;
 		unsigned long height;
 		unsigned long width;
+		unsigned int depth;
 	};
 
 	enum vdIntegerControl {
@@ -63,16 +64,17 @@ namespace vc {
 			int getIntegerControlStep(const vdIntegerControl);
 			void setIntegerControlValue(const vdIntegerControl, const int);
 
-			bool setSize(unsigned int, unsigned int);
+			bool setDimensions(unsigned int, unsigned int);
+			vector < pair <int,int> > getDimensions();
 
 		private:
 
 			void v2_init();
 			void v1_init();
 
-			string v1_paletteName (int);
+			string v1_paletteName(int);
 
-			void setBufferSize ();
+			void setBufferSize();
 
 			string deviceName;
 			bool live; // Penultimate determinant of device status
@@ -100,7 +102,7 @@ namespace vc {
 			video_picture v1_controls;
 			video_window v1_window;
 
-			vector < pair <int,int> > capableSizes;
+			vector < pair <int,int> > capableDimensions;
 			unsigned int bufferSize;
 	};
 
