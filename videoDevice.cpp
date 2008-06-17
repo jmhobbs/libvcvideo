@@ -163,8 +163,16 @@ namespace vc {
 	*/
 	void videoDevice::v1_init () {
 
+		#ifdef SIGCPP
+		sig_progress.emit(10,"Checking Type");
+		#endif
+
 		if(v1_capabilities.type != VID_TYPE_CAPTURE)
 			throw string("Device '"+deviceName+" not a video capture device.");
+
+		#ifdef SIGCPP
+		sig_progress.emit(20,"Enumerating Channels");
+		#endif
 
 		#ifdef VCVIDEO_DEBUG
 		cerr << "----[V4L1 Device Found]---------------------------" << endl;
@@ -200,17 +208,33 @@ namespace vc {
 		cerr << "--------------------------------------------------\n" << endl;
 		#endif
 
+		#ifdef SIGCPP
+		sig_progress.emit(30,"Setting Default Channel");
+		#endif
+
 		// Set to first channel by default?
 		if(v1_capabilities.channels > 1)
 			if(-1 == ioctl(fd,VIDIOCSCHAN,0))
 				throw string("Can't set default channel.");
 
+		#ifdef SIGCPP
+		sig_progress.emit(40,"Checking Camera Class");
+		#endif
+
 		if(v1_inputs[0].type != VIDEO_TYPE_CAMERA)
 			throw string("This is a V4L1 TV device. We don't handle those yet (They have tuners!).");
+
+		#ifdef SIGCPP
+		sig_progress.emit(50,"Getting Properties");
+		#endif
 
 		// Get the picture information
 		if(-1 == ioctl(fd,VIDIOCGPICT,&v1_controls))
 			throw new string("Can't get image properties.");
+
+		#ifdef SIGCPP
+		sig_progress.emit(60,"Getting Region");
+		#endif
 
 		#ifdef VCVIDEO_DEBUG
 		cerr << "----[Image Properties]----------------------------" << endl;
@@ -226,6 +250,10 @@ namespace vc {
 
 		if(-1 == ioctl(fd,VIDIOCGWIN,&v1_window))
 			throw string("Could not get the viewing window.");
+
+		#ifdef SIGCPP
+		sig_progress.emit(70,"Checking Dimensions");
+		#endif
 
 		#ifdef VCVIDEO_DEBUG
 		cerr << "----[Video Sizes]---------------------------------" << endl;
@@ -251,6 +279,10 @@ namespace vc {
 		cerr << "--------------------------------------------------\n" << endl;
 		#endif
 
+		#ifdef SIGCPP
+		sig_progress.emit(80,"Setting Dimensions");
+		#endif
+
 		try {
 			if(!setDimensions(v1_capabilities.maxwidth, v1_capabilities.maxheight))
 				throw string ("Dimensions weren't set to desired size.");
@@ -259,9 +291,15 @@ namespace vc {
 			throw s;
 		}
 
+		#ifdef SIGCPP
+		sig_progress.emit(90,"Setting Buffer");
+		#endif
+
 		setBufferSize();
 
-
+		#ifdef SIGCPP
+		sig_progress.emit(100,"Done");
+		#endif
 
 		//! \todo Split this function up into common chunks.
 

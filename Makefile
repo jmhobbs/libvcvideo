@@ -19,18 +19,27 @@
 
 # Compiler setup
 CC=g++
-CFLAGS=-Wall -g -DVCVIDEO_DEBUG
+CFLAGS=-Wall -g -DVCVIDEO_DEBUG -DSIGCPP
 COMPILER=$(CC) $(CFLAGS)
+
 MAGICKFLAGS = `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+
+GTKFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
+
+SIGCPPCFLAGS = `pkg-config --cflags sigc++-2.0`
+SIGCPPLFLAGS = `pkg-config --cflags --libs sigc++-2.0`
 
 # Targets
 lib: videoDevice.o
 
 test: videoDevice.o vcvTest.o
-	$(COMPILER) videoDevice.o vcvTest.o -o $@
+	$(COMPILER) $(SIGCPPLFLAGS) videoDevice.o vcvTest.o -o $@
 
 testMagick: videoDevice.o vcvTest.cpp
-	$(COMPILER) $(MAGICKFLAGS) -DHAVE_MAGICK videoDevice.o vcvTest.cpp -o $@
+	$(COMPILER) $(SIGCPPLFLAGS) $(MAGICKFLAGS) -DHAVE_MAGICK videoDevice.o vcvTest.cpp -o $@
+
+testGtk: videoDevice.o gtkTest.cpp
+	$(COMPILER) $(GTKFLAGS) videoDevice.o gtkTest.cpp -o $@
 
 clean:
 	@rm -f *.o
@@ -41,7 +50,7 @@ clean:
 .SUFFIXES : .cpp .o .h
 
 .cpp.o:
-	$(COMPILER) -c $< -o $@
+	$(COMPILER) $(SIGCPPCFLAGS) -c $< -o $@
 
 gendeps:
 	@g++ -D_x86 -D_LINUX -MM *.cpp | sed 's/^\([a-zA-Z]\)/\n\1/' > dependency.mk

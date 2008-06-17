@@ -24,6 +24,10 @@
 #include <string>
 #include <vector>
 
+#ifdef SIGCPP
+#include <sigc++/sigc++.h>
+#endif
+
 using std::string;
 using std::vector;
 using std::pair;
@@ -69,7 +73,9 @@ namespace vc {
 			bool setDimensions(unsigned int, unsigned int);
 			vector < pair <int,int> > getDimensions();
 
-
+			#ifdef SIGCPP
+			sigc::signal <void,int,string> sig_progress;
+			#endif
 
 		private:
 
