@@ -2,14 +2,27 @@
 #include <gtkmm/main.h>
 #include <gtkmm/window.h>
 #include <gtkmm/image.h>
+#include <gtkmm/progressbar.h>
 
 #include "videoDevice.h"
 
 class Viewer : public Gtk::Window {
 	public:
 		Viewer() : vd("/dev/video0") {
-			add(screen);
+			loading.set_text("Initializing Device");
+			add(loading);
 			show_all();
+			Glib::signal_timeout().connect(sigc::mem_fun(*this,&Viewer::init),100);
+		}
+
+	private:
+		Gtk::ProgressBar loading;
+		Gtk::Image screen;
+		sigc::connection timer;
+		vc::videoDevice vd;
+		vc::vdFrame frame;
+
+		bool init () {
 			vd.sig_progress.connect(sigc::mem_fun(*this,&Viewer::signalCatch));
 			try {
 				vd.init();
@@ -18,14 +31,13 @@ class Viewer : public Gtk::Window {
 				std::cerr << "Viewer::Viewer() -> " << s << std::endl;
 				exit(1);
 			}
-			refresh();
+			screen.set_size_request(640,480);
+			remove();
+			add(screen);
+			show_all();
+			timer = Glib::signal_timeout().connect(sigc::mem_fun(*this,&Viewer::refresh),100);
+			return false;
 		}
-
-	private:
-		Gtk::Image screen;
-		sigc::connection timer;
-		vc::videoDevice vd;
-		vc::vdFrame frame;
 
 		bool refresh () {
 
@@ -38,18 +50,19 @@ class Viewer : public Gtk::Window {
 				frame.width,
 				frame.height,
 				Gdk::RGB_DITHER_NONE,
-				(const guchar*)frame.buffer,
+				(const guchar*) frame.buffer,
 				frame.width*3
 			);
-
-			while (Gtk::Main::events_pending ())
-				Gtk::Main::iteration ();
 
 			return true;
 		}
 
 		void signalCatch(int state, std::string msg) {
 			std::clog << state << "/100 " << msg << std::endl;
+			loading.set_text(msg);
+			loading.set_fraction(((double)state)/100.0);
+			while (Gtk::Main::events_pending ())
+				Gtk::Main::iteration ();
 		}
 };
 

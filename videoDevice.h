@@ -35,11 +35,13 @@ using std::pair;
 namespace vc {
 
 	typedef struct vdFrame {
-		void * buffer;
+		char * buffer;
 		unsigned long bufferSize;
 		unsigned long height;
 		unsigned long width;
 		unsigned int depth;
+		bool status;
+		vdFrame() { buffer = NULL; bufferSize = 0; }
 	};
 
 	enum vdIntegerControl {

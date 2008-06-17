@@ -62,7 +62,6 @@ int main (int argc, char ** argv) {
 		cout << "\tBuffer size: " << tFrame.bufferSize << endl;
 		#ifdef HAVE_MAGICK
 		Magick::Image image(tFrame.width, tFrame.height, "RGB", Magick::CharPixel, tFrame.buffer);
-		//image.depth(8);
 		image.magick("JPEG");
 		image.write("testImage.jpg");
 		#endif

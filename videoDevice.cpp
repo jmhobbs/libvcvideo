@@ -330,7 +330,13 @@ namespace vc {
 			frame.height = v1_window.height;
 			frame.depth = v1_controls.depth;
 			//! \todo Set buffer size somewhere else and base it on palette.
-			frame.bufferSize = bufferSize;
+			if(frame.bufferSize != bufferSize) {
+				frame.bufferSize = bufferSize;
+				if(NULL != frame.buffer)
+					delete frame.buffer;
+				frame.buffer = new char [frame.bufferSize];
+			}
+			frame.status = (-1 != read(fd, frame.buffer, frame.bufferSize));
 		}
 	}
 
