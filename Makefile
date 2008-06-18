@@ -43,7 +43,7 @@ testGtk: $(TRGT_TEST_GTK)
 	$(COMPILER) $(GTKLFLAGS) $(TRGT_TEST_GTK) -o $@
 
 docs: lib/videoDevice.h lib/videoDevice.cpp docs/tutorial.dox
-	cd docs && doxygen config.doxy
+	cd docs && doxygen config.doxy && echo ".fragment { overflow: auto; }" >> html/doxygen.css
 
 clean:
 	@rm -f lib/*.o
