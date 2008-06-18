@@ -35,6 +35,7 @@ using std::pair;
 namespace vc {
 
 	typedef struct vdFrame {
+		//! \var This is the image data in 3 bytes in BGR order.
 		char * buffer;
 		unsigned long bufferSize;
 		unsigned long height;
@@ -44,6 +45,9 @@ namespace vc {
 		vdFrame() { buffer = NULL; bufferSize = 0; }
 	};
 
+	/*!
+		These are all available integer type controls.
+	*/
 	enum vdIntegerControl {
 		BRIGHTNESS,
 		CONTRAST,
@@ -116,6 +120,9 @@ namespace vc {
 
 			vector < pair <int,int> > capableDimensions;
 			unsigned int bufferSize;
+
+			// Format converters
+			void fmt_VIDEO_PALETTE_RGB24(vdFrame &);
 	};
 
 };

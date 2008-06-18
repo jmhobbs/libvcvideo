@@ -58,7 +58,6 @@ class Viewer : public Gtk::Window {
 		}
 
 		void signalCatch(int state, std::string msg) {
-			std::clog << state << "/100 " << msg << std::endl;
 			loading.set_text(msg);
 			loading.set_fraction(((double)state)/100.0);
 			while (Gtk::Main::events_pending ())

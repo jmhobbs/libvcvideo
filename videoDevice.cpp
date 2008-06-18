@@ -259,12 +259,20 @@ namespace vc {
 		cerr << "----[Video Sizes]---------------------------------" << endl;
 		#endif
 		// This is from gspca stuff, better method available?
-		int sizes[14] = {640,480,384,288,352,288,320,240,192,144,176,144,160,120};
-		for(int j = 0; j < 13; j++) {
+		#define POS_DIMS 14
+		int sizes[POS_DIMS] = {640,480,384,288,352,288,320,240,192,144,176,144,160,120};
+
+		for(int j = 0; j < POS_DIMS-1; j++) {
+
 			if(sizes[j] > v1_capabilities.maxwidth)
 				continue;
 			if(sizes[j] < v1_capabilities.minwidth)
 				break;
+
+			#ifdef SIGCPP
+			//! \todo This doesn't work very well. Not accurate.
+			sig_progress.emit(70+((double)j)*(10.0/POS_DIMS),"Checking Dimensions");
+			#endif
 
 			v1_window.width = sizes[j];
 			v1_window.height = sizes[j+1];
@@ -274,6 +282,7 @@ namespace vc {
 				#endif
 				capableDimensions.push_back(pair<int,int>(sizes[j],sizes[j+1]));
 			}
+
 		}
 		#ifdef VCVIDEO_DEBUG
 		cerr << "--------------------------------------------------\n" << endl;
@@ -313,8 +322,9 @@ namespace vc {
 		Get a frame from the device.
 
 		\todo V4L2 Implementation.
+		\todo Memory mapping implementation.
 
-		\throws string If device is not initialized or it is a V4L2 device.
+		\throws string If device is not initialized or it is a V4L2 device. Also if it has an unsupported format.
 
 		\param frame The vdFrame struct to store into.
 	*/
@@ -337,6 +347,28 @@ namespace vc {
 				frame.buffer = new char [frame.bufferSize];
 			}
 			frame.status = (-1 != read(fd, frame.buffer, frame.bufferSize));
+			switch (v1_controls.palette) {
+				case VIDEO_PALETTE_RGB24:
+					fmt_VIDEO_PALETTE_RGB24(frame);
+					break;
+				//! \todo The rest of these formats...
+				case VIDEO_PALETTE_GREY:
+				case VIDEO_PALETTE_HI240:
+				case VIDEO_PALETTE_RGB565:
+				case VIDEO_PALETTE_RGB555:
+				case VIDEO_PALETTE_RGB32:
+				case VIDEO_PALETTE_YUV422:
+				case VIDEO_PALETTE_YUYV:
+				case VIDEO_PALETTE_UYVY:
+				case VIDEO_PALETTE_YUV420:
+				case VIDEO_PALETTE_YUV411:
+				case VIDEO_PALETTE_RAW:
+				case VIDEO_PALETTE_YUV422P:
+				case VIDEO_PALETTE_YUV411P:
+				default:
+					throw string("Frame is in an unsupported format: "+v1_paletteName(v1_controls.palette));
+					break;
+			}
 		}
 	}
 
@@ -673,6 +705,13 @@ namespace vc {
 
 	/*!
 		Attempts to set the device to the specified dimensions.
+
+		\throws string If V4L2 device.
+
+		\param width The width to set.
+		\param height The height to set.
+
+		\return True if set exactly to those values. False otherwise.
 	*/
 	bool videoDevice::setDimensions (unsigned int width, unsigned int height) {
 		if(isV4L2) {
@@ -748,4 +787,19 @@ namespace vc {
 		return toReturn;
 	}
 
+	/*!
+		Convert the palette to the default format.
+
+		\todo Performance check.
+
+		\param frame The frame to operate on. Must be filled correctly.
+	*/
+	void videoDevice::fmt_VIDEO_PALETTE_RGB24(vdFrame & frame) {
+		char temp;
+		for(unsigned long i = 0; i+2 < frame.bufferSize; i += 3) {
+			 temp = frame.buffer[i];
+			 frame.buffer[i] = frame.buffer[i+2];
+			 frame.buffer[i+2] = temp;
+		}
+	}
 }
