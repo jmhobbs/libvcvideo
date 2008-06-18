@@ -19,22 +19,14 @@
 
 # Compiler setup
 CC = g++
-CFLAGS = -Wall -g -I.
-LFLAGS = -Wall
+CFLAGS = -Wall -g -I. -DVCVIDEO_DEBUG -DSIGCPP `pkg-config --cflags sigc++-2.0` -DHAVE_MAGICK `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+LFLAGS = -Wall `pkg-config --cflags --libs sigc++-2.0` `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
 
-ifeq ($(VCVIDEO_DEBUG),YES)
-  CFLAGS = $(CFLAGS) -DVCVIDEO_DEBUG
-endif
-
-ifeq ($(SIGCPP),YES)
-  CFLAGS = $(CFLAGS) -DSIGCPP `pkg-config --cflags sigc++-2.0`
-  LFLAGS = $(LFLAGS) `pkg-config --cflags --libs sigc++-2.0`
-endif
-
-ifeq ($(HAVEMAGICK),YES)
-  CFLAGS = $(CFLAGS) -DHAVE_MAGICK `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
-  LFLAGS = $(LFLAGS) `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
-endif
+# CFLAGS = $(CFLAGS) -DVCVIDEO_DEBUG
+# CFLAGS = $(CFLAGS) -DSIGCPP `pkg-config --cflags sigc++-2.0`
+# LFLAGS = $(LFLAGS) `pkg-config --cflags --libs sigc++-2.0`
+# CFLAGS = $(CFLAGS) -DHAVE_MAGICK `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+# LFLAGS = $(LFLAGS) `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
 
 COMPILER = $(CC) $(CFLAGS)
 
@@ -44,15 +36,14 @@ GTKLFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
 # Targets
 TRGT_TEST_PLAIN = lib/videoDevice.o test/vcvTest.o
 testPlain: $(TRGT_TEST_PLAIN)
-	$(COMPILER) $(TRGT_TEST_PLAIN) -o $@
-
-TRGT_TEST_MAGICK = lib/videoDevice.o test/vcvTest.o
-testMagick:
-	$(COMPILER) $(TRGT_TEST_MAGICK) -o $@
+	$(COMPILER) $(LFLAGS) $(TRGT_TEST_PLAIN) -o $@
 
 TRGT_TEST_GTK = lib/videoDevice.o test/gtkTest.o
-testGtk:
+testGtk: $(TRGT_TEST_GTK)
 	$(COMPILER) $(GTKLFLAGS) $(TRGT_TEST_GTK) -o $@
+
+docs: lib/videoDevice.h lib/videoDevice.cpp docs/tutorial.dox
+	cd docs && doxygen config.doxy
 
 clean:
 	@rm -f lib/*.o
@@ -60,6 +51,7 @@ clean:
 	@rm -f testPlain
 	@rm -f testMagick
 	@rm -f testGtk
+	@rm -rf docs/html/*
 
 # Object targets
 .SUFFIXES : .cpp .o .h
@@ -67,7 +59,7 @@ clean:
 .cpp.o:
 	$(COMPILER) -c $< -o $@
 
-gendeps:
+depend:
 	@echo '# Do not change this file unless you know what you are doing. Use make gendeps instead.' > dependency.mk
 	g++ -I. -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
 	g++ -I. -MM test/*.cpp | sed 's/^\([a-zA-Z]\)/\ntest\/\1/' >> dependency.mk
@@ -77,4 +69,4 @@ include dependency.mk
 # Special cases...
 TRGT_TEST_GTKTEST_O = test/gtkTest.cpp lib/videoDevice.h
 test/gtkTest.o: $(TRGT_TEST_GTKTEST_O)
-	$(COMPILER) $(GTKCFLAGS) -c $(TRGT_TEST_GTKTEST_O) -o $@
+	$(COMPILER) $(GTKCFLAGS) -c test/gtkTest.cpp -o $@

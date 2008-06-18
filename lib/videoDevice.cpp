@@ -19,6 +19,13 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+// Device enumeration includes
+#include <stddef.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <dirent.h>
+
+
 #ifdef VCVIDEO_DEBUG
 	#include <iostream>
 	using std::cerr;
@@ -345,7 +352,8 @@ namespace vc {
 					delete frame.buffer;
 				frame.buffer = new char [frame.bufferSize];
 			}
-			frame.status = (-1 != read(fd, frame.buffer, frame.bufferSize));
+			if(-1 == read(fd, frame.buffer, frame.bufferSize))
+				throw string("Failed to read data from device.");
 			switch (v1_controls.palette) {
 				case VIDEO_PALETTE_RGB24:
 					fmt_VIDEO_PALETTE_RGB24(frame);
@@ -800,5 +808,34 @@ namespace vc {
 			 frame.buffer[i] = frame.buffer[i+2];
 			 frame.buffer[i+2] = temp;
 		}
+	}
+
+	/*!
+		Attempts to enumerate the devices attached to the system.
+		Checks for devices named "video#" in the /dev directory.
+
+		\note These are not guaranteed to be legitimate or compatible devices, it's best guess.
+
+		\throws string When it cannot open the /dev directory.
+
+		\return A vector of strings containing the absolute path to the device.
+	*/
+	vector <string> videoDevice::enumerateDevices () {
+		vector <string> returnValue;
+		DIR *dp;
+		struct dirent *ep;
+
+		dp = opendir ("/dev/");
+		if(dp != NULL) {
+			while (ep = readdir(dp)) {
+				if(0 == strncmp(ep->d_name,"videoX",5))
+					returnValue.push_back(string("/dev/")+ep->d_name);
+			}
+			(void) closedir (dp);
+		}
+		else
+			throw string ("Could not open /dev/ directory.");
+
+		return returnValue;
 	}
 }

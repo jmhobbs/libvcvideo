@@ -1,0 +1,218 @@
+/*!
+	\page Tutorial1 Introduction to libvcvideo
+	libvcvideo is a lowest common denominator video library. It is targeted as
+	a cross platform tool, but currently supports only select Linux V4L devices.
+
+	Planned development will expand the V4L device selection, then add full V4L2
+	support, and finally move on to other platforms.
+
+	Currently supported devices are V4L WebCams that run in RGB24 mode, which is
+	most of the webcams supported by the spca5xx and gspca drivers.
+
+	Please see the following pages for more information.
+
+	- \subpage Tutorial2
+	- \subpage Tutorial3
+	- \subpage Tutorial4
+	  - \ref Tutorial4gtkmm
+	  - \ref Tutorial4magick
+*/
+
+/*!
+	\page Tutorial2 The Basics
+
+	Using libvcvideo at it's most basic level is very simple.  The following code
+	will open a device located at "/dev/video0" and read a frame into memory.
+
+	Here is the code, which will be taken piece by piece in a moment.
+	\code
+    1   #include <iostream>
+    2   using std::cerr;
+    3   using std::endl;
+    4   #include <string>
+    5   using std::string;
+    6
+    7   #include "lib/videoDevice.h"
+    8
+    9   int main (int argc, char ** argv) {
+   10     vc::videoDevice device ("/dev/video0");
+   11     vc::vdFrame frame;
+   12
+   13     try {
+   14       device.init();
+   15     }
+   16     catch(string s) {
+   17       cerr << "Device initialization failed: " << s << endl;
+   18       exit(1);
+   19     }
+   20
+   21     try {
+   22       test.getFrame(frame);
+   23     }
+   24     catch(string s) {
+   25       cout << "Failed to get frame: " << s << endl;
+   26       exit(1);
+   27     }
+   28   }
+	\endcode
+	It's pretty standard stuff. Our include file is called "videoDevice.h" which will
+	be in a different directory depending on how you are doing your development.
+
+	At line 10 we start using the library. Everything is kept in the vc namespace,
+	which stands for <a href="http://www.velvetcache.org/">VelvetCache.org</a> and is why the library is named as it is.
+
+	The two things in the vc namespace we are concerned with right now are the
+	\link vc::videoDevice videoDevice \endlink object and the \link vc::vdFrame vdFrame \endlink struct.  We create one of each, and we pass
+	the \link vc::videoDevice videoDevice \endlink an absolute path to our device, in this case "/dev/video0".
+	The \link vc::videoDevice videoDevice \endlink class provides a static member for finding video devices on the
+	fly, called enumerateDevices, but we leave it's use as an exercise for the reader.
+	\code
+   10     vc::videoDevice device ("/dev/video0");
+   11     vc::vdFrame frame;
+	\endcode
+
+	Simply creating our \link vc::videoDevice videoDevice \endlink object doesn't really do anything, so we need to
+	initialize it, like on line 14. libvcvideo uses exceptions for almost all of
+	it's error handling, and it always throws plain old std::string objects. Thus we
+	need to wrap all our volatile calls in try/catch blocks.  You can check the API
+	to see what methods throw exceptions and why.
+	\code
+   14       device.init();
+	\endcode
+
+	If we get through initialization the device will be opened at it's largest capture
+	dimensions by default.  To get a frame all we have to do is ask using \link vc::videoDevice::getFrame getFrame \endlink
+	passing along our \link vc::vdFrame vdFrame \endlink struct, like on line 22.  There is no need to prepare
+	the frame in any way, the object will handle that in the call.
+	\code
+   22       test.getFrame(frame);
+	\endcode
+
+	Thats it. The frame struct now holds data from your video device in 3 bytes per
+	pixel, with BGR byte ordering.  You can now dump this to a file, show it to the
+	user, or do whatever with it that you please.
+
+	<hr>
+	Navigation: \ref Tutorial1 "Home" - \ref Tutorial3 "Next (Other Methods)"
+*/
+
+/*!
+	\page Tutorial3 Other Methods
+	There are numerous other tools that libvcvideo provides before and after initialization.
+
+	\section Static Static Methods
+	Possibly the most useful static method is the vc::videoDevice::enumerateDevices method which
+	returns a std::vector of std::strings that are likely video devices on your system.  You can
+	then iterate over the devices to try them out and see if they work with libvcvideo.
+
+	Another static method is the vc::videoDevice::getIntegerControlString method. This will
+	get the appropriate std::string name for an integer control, which are discussed
+	in the Normal Methods section below.
+
+	<hr>
+
+	\section Normal Normal Methods
+	These methods can only be called after device initialization is done.
+
+	\subsection integerControls Integer Controls
+	Integer Controls are any aspect of the device that can be controlled by an
+	integer value.  The currently supported controls are listed in the vc::vdIntegerControl
+	enumeration.
+
+	The vc::videoDevice::getValidIntegerControls will return a vector of integer controls
+	that you can use on your device. You can then use vc::videoDevice::getIntegerControlMinimum
+	and vc::videoDevice::getIntegerControlMaximum to find the range of the control, and
+	vc::videoDevice::getIntegerControlStep to find the effective step value for it.
+
+	\code
+    1   try {
+    2     cout << "Brightness (min/max/cur): "
+    3          << device.getIntegerControlMinimum(vc::BRIGHTNESS) << "/"
+    4          << device.getIntegerControlMaximum(vc::BRIGHTNESS) << "/"
+    5          << device.getIntegerControlValue(vc::BRIGHTNESS) << endl;
+    6   }
+    7   catch(string s) {
+    8     cout << "Brightness Information Failed: " << s << endl;
+    9     exit(1);
+   10   }
+	\endcode
+
+	With all this information in hand you can then get and set the control through the
+	vc::videoDevice::getIntegerControlValue and vc::videoDevice::setIntegerControlValue methods.
+
+	\code
+    1   try {
+    2     device.setIntegerControlValue(vc::BRIGHTNESS,5000);
+    3     cout << device.getIntegerControlValue(vc::BRIGHTNESS) << endl;
+    4   }
+    5   catch(string s) {
+    6     cout << "Brightness Change Failed: " << s << endl;
+    7     exit(1);
+    8   }
+	\endcode
+
+	It may seem verbose, but it is very usable.
+
+	<hr>
+
+	\section Signals Signals
+	Signals using libsigc++2 can optionally be built into libvcvideo. If you do
+	build them in you are provided with the useful vc::videoDevice::sig_progress.
+	This will give an integer of completion out of 100 and a string of what it is
+	currently doing.  Right now this is only valid for vc::videoDevice::init but
+	it can be very handy.
+
+	<hr>
+	Navigation: \ref Tutorial2 "Back (The Basics)" - \ref Tutorial1 "Home" - \ref Tutorial4 "Next (Integration)"
+*/
+
+/*!
+	\page Tutorial4 Integration
+	Here are some helpful snippets and tips for integrating this library in different ways.
+
+	- \subpage Tutorial4gtkmm
+	- \subpage Tutorial4magick
+
+	<hr>
+	Navigation: \ref Tutorial3 "Back (Other Methods)" - \ref Tutorial1 "Home" - \ref Tutorial4gtkmm "Next (Integration - gtkmm)"
+*/
+
+/*!
+	\page Tutorial4gtkmm Integration - gtkmm
+	I'm not a whiz with gtkmm, but here is a snippet for putting the buffer from
+	a frame into a Gtk::Image.
+
+	\code
+    1   gtkimage.get_window()->draw_rgb_image(
+    2     gtkimage.get_style()->get_bg_gc(Gtk::STATE_NORMAL),
+    3     0,
+    4     0,
+    5     frame.width,
+    6     frame.height,
+    7     Gdk::RGB_DITHER_NONE,
+    8     (const guchar*) frame.buffer,
+    9     frame.width*3
+   10   );
+	\endcode
+
+	That is assuming you have a Gtk::Image called gtkimage and a \link vc::vdFrame vdFrame \endlink called frame.
+
+	<hr>
+	Navigation: \ref Tutorial4 "Back (Integration)" - \ref Tutorial1 "Home" - \ref Tutorial4magick "Next (Integration - libmagick++)"
+*/
+
+/*!
+	\page Tutorial4magick Integration - libmagick++
+	This is a snippet to write a frame out to file as a JPEG using libmagick++.
+
+	\code
+    1  Magick::Image image(frame.width, frame.height, "RGB", Magick::CharPixel, frame.buffer);
+    2  image.magick("JPEG");
+    3  image.write("testImage.jpg")
+	\endcode
+
+	That is assuming you have a loaded \link vc::vdFrame vdFrame \endlink called frame.
+
+	<hr>
+	Navigation: \ref Tutorial4gtkmm "Back (Integration - gtkmm)" - \ref Tutorial1 "Home" - \ref Tutorial4 "Up (Integration)"
+*/

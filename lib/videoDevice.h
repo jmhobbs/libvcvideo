@@ -44,9 +44,8 @@ namespace vc {
 		unsigned long height;
 		//! Width of this frame.
 		unsigned long width;
-		//! True if the frame is usable.
-		bool status;
 		vdFrame() { buffer = NULL; bufferSize = 0; }
+		~vdFrame() { if(NULL != buffer) delete buffer; }
 	};
 
 	/*!
@@ -86,6 +85,8 @@ namespace vc {
 			#ifdef SIGCPP
 			sigc::signal <void,int,string> sig_progress;
 			#endif
+
+			static vector <string> enumerateDevices ();
 
 		private:
 

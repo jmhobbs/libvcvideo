@@ -18,6 +18,7 @@
 */
 #include <iostream>
 #include <string>
+#include <vector>
 
 #ifdef HAVE_MAGICK
 #include <Magick++.h>
@@ -30,6 +31,19 @@ using namespace std;
 using namespace vc;
 
 int main (int argc, char ** argv) {
+
+	try {
+		cout << "Checking out what video devices are attached." << endl;
+		vector <string> devices(videoDevice::enumerateDevices());
+		cout << "Found " << devices.size() << " devices." << endl;
+		if(devices.size() == 0)
+			exit(0);
+		for(vector <string>::iterator it = devices.begin(); it < devices.end(); ++it)
+			cout << "\tFound Device: " << *it << endl;
+	}
+	catch(string s) {
+		cout << "Error enumerating devices. Oh well." << endl;
+	}
 
 	videoDevice test ("/dev/video0");
 
