@@ -1,5 +1,12 @@
 /*!
-	\page Tutorial1 Introduction to libvcvideo
+	\namespace vc
+	\brief The VelvetCache.org namespace.
+
+	All projects started by John Hobbs (john@velvetcache.org) are based in this namespace.
+*/
+
+/*!
+	\mainpage Introduction to libvcvideo
 	libvcvideo is a lowest common denominator video library. It is targeted as
 	a cross platform tool, but currently supports only select Linux V4L devices.
 
@@ -93,7 +100,7 @@
 	user, or do whatever with it that you please.
 
 	<hr>
-	Navigation: \ref Tutorial1 "Home" - \ref Tutorial3 "Next (Other Methods)"
+	Navigation: \ref main "Home" - \ref Tutorial3 "Next (Other Methods)"
 */
 
 /*!
@@ -163,7 +170,7 @@
 	it can be very handy.
 
 	<hr>
-	Navigation: \ref Tutorial2 "Back (The Basics)" - \ref Tutorial1 "Home" - \ref Tutorial4 "Next (Integration)"
+	Navigation: \ref Tutorial2 "Back (The Basics)" - \ref main "Home" - \ref Tutorial4 "Next (Integration)"
 */
 
 /*!
@@ -174,7 +181,7 @@
 	- \subpage Tutorial4magick
 
 	<hr>
-	Navigation: \ref Tutorial3 "Back (Other Methods)" - \ref Tutorial1 "Home" - \ref Tutorial4gtkmm "Next (Integration - gtkmm)"
+	Navigation: \ref Tutorial3 "Back (Other Methods)" - \ref main "Home" - \ref Tutorial4gtkmm "Next (Integration - gtkmm)"
 */
 
 /*!
@@ -198,7 +205,7 @@
 	That is assuming you have a Gtk::Image called gtkimage and a \link vc::vdFrame vdFrame \endlink called frame.
 
 	<hr>
-	Navigation: \ref Tutorial4 "Back (Integration)" - \ref Tutorial1 "Home" - \ref Tutorial4magick "Next (Integration - libmagick++)"
+	Navigation: \ref Tutorial4 "Back (Integration)" - \ref main "Home" - \ref Tutorial4magick "Next (Integration - libmagick++)"
 */
 
 /*!
@@ -214,5 +221,5 @@
 	That is assuming you have a loaded \link vc::vdFrame vdFrame \endlink called frame.
 
 	<hr>
-	Navigation: \ref Tutorial4gtkmm "Back (Integration - gtkmm)" - \ref Tutorial1 "Home" - \ref Tutorial4 "Up (Integration)"
+	Navigation: \ref Tutorial4gtkmm "Back (Integration - gtkmm)" - \ref main "Home" - \ref Tutorial4 "Up (Integration)"
 */
