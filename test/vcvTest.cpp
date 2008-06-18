@@ -25,7 +25,7 @@
 
 using namespace std;
 
-#include "videoDevice.h"
+#include "lib/videoDevice.h"
 
 using namespace vc;
 

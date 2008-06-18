@@ -18,41 +18,63 @@
 # along with libvcvideo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Compiler setup
-CC=g++
-CFLAGS=-Wall -g -DVCVIDEO_DEBUG -DSIGCPP
-COMPILER=$(CC) $(CFLAGS)
+CC = g++
+CFLAGS = -Wall -g -I.
+LFLAGS = -Wall
 
-MAGICKFLAGS = `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+ifeq ($(VCVIDEO_DEBUG),YES)
+  CFLAGS = $(CFLAGS) -DVCVIDEO_DEBUG
+endif
 
-GTKFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
+ifeq ($(SIGCPP),YES)
+  CFLAGS = $(CFLAGS) -DSIGCPP `pkg-config --cflags sigc++-2.0`
+  LFLAGS = $(LFLAGS) `pkg-config --cflags --libs sigc++-2.0`
+endif
 
-SIGCPPCFLAGS = `pkg-config --cflags sigc++-2.0`
-SIGCPPLFLAGS = `pkg-config --cflags --libs sigc++-2.0`
+ifeq ($(HAVEMAGICK),YES)
+  CFLAGS = $(CFLAGS) -DHAVE_MAGICK `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+  LFLAGS = $(LFLAGS) `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+endif
+
+COMPILER = $(CC) $(CFLAGS)
+
+GTKCFLAGS = `pkg-config gtkmm-2.4 --cflags`
+GTKLFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
 
 # Targets
-lib: videoDevice.o
+TRGT_TEST_PLAIN = lib/videoDevice.o test/vcvTest.o
+testPlain: $(TRGT_TEST_PLAIN)
+	$(COMPILER) $(TRGT_TEST_PLAIN) -o $@
 
-test: videoDevice.o vcvTest.o
-	$(COMPILER) $(SIGCPPLFLAGS) videoDevice.o vcvTest.o -o $@
+TRGT_TEST_MAGICK = lib/videoDevice.o test/vcvTest.o
+testMagick:
+	$(COMPILER) $(TRGT_TEST_MAGICK) -o $@
 
-testMagick: videoDevice.o vcvTest.cpp
-	$(COMPILER) $(SIGCPPLFLAGS) $(MAGICKFLAGS) -DHAVE_MAGICK videoDevice.o vcvTest.cpp -o $@
-
-testGtk: videoDevice.o gtkTest.cpp
-	$(COMPILER) $(GTKFLAGS) videoDevice.o gtkTest.cpp -o $@
+TRGT_TEST_GTK = lib/videoDevice.o test/gtkTest.o
+testGtk:
+	$(COMPILER) $(GTKLFLAGS) $(TRGT_TEST_GTK) -o $@
 
 clean:
-	@rm -f *.o
-	@rm -f test
+	@rm -f lib/*.o
+	@rm -f test/*.o
+	@rm -f testPlain
 	@rm -f testMagick
+	@rm -f testGtk
 
 # Object targets
 .SUFFIXES : .cpp .o .h
 
 .cpp.o:
-	$(COMPILER) $(SIGCPPCFLAGS) -c $< -o $@
+	$(COMPILER) -c $< -o $@
 
 gendeps:
-	@g++ -D_x86 -D_LINUX -MM *.cpp | sed 's/^\([a-zA-Z]\)/\n\1/' > dependency.mk
+	@echo '# Do not change this file unless you know what you are doing. Use make gendeps instead.' > dependency.mk
+	g++ -I. -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
+	g++ -I. -MM test/*.cpp | sed 's/^\([a-zA-Z]\)/\ntest\/\1/' >> dependency.mk
 
 include dependency.mk
+
+# Special cases...
+TRGT_TEST_GTKTEST_O = test/gtkTest.cpp lib/videoDevice.h
+test/gtkTest.o: $(TRGT_TEST_GTKTEST_O)
+	$(COMPILER) $(GTKCFLAGS) -c $(TRGT_TEST_GTKTEST_O) -o $@

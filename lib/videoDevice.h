@@ -34,13 +34,17 @@ using std::pair;
 
 namespace vc {
 
+	//! This is a single frame from the video device.
 	typedef struct vdFrame {
-		//! \var This is the image data in 3 bytes in BGR order.
+		//! This is the image data in 3 bytes in BGR order.
 		char * buffer;
+		//! Size in bytes of the image data. Should always be 3*width.
 		unsigned long bufferSize;
+		//! Height of this frame.
 		unsigned long height;
+		//! Width of this frame.
 		unsigned long width;
-		unsigned int depth;
+		//! True if the frame is usable.
 		bool status;
 		vdFrame() { buffer = NULL; bufferSize = 0; }
 	};

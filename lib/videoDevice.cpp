@@ -26,7 +26,7 @@
 	using std::endl;
 #endif
 
-#include "videoDevice.h"
+#include "lib/videoDevice.h"
 
 namespace vc {
 
@@ -338,7 +338,6 @@ namespace vc {
 		else {
 			frame.width = v1_window.width;
 			frame.height = v1_window.height;
-			frame.depth = v1_controls.depth;
 			//! \todo Set buffer size somewhere else and base it on palette.
 			if(frame.bufferSize != bufferSize) {
 				frame.bufferSize = bufferSize;

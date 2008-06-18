@@ -4,7 +4,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/progressbar.h>
 
-#include "videoDevice.h"
+#include "lib/videoDevice.h"
 
 class Viewer : public Gtk::Window {
 	public:
