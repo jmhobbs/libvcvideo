@@ -22,6 +22,8 @@
 
 #ifdef HAVE_MAGICK
 #include <Magick++.h>
+#else
+#include <fstream>
 #endif
 
 using namespace std;
@@ -32,27 +34,45 @@ using namespace vc;
 
 int main (int argc, char ** argv) {
 
+	string devName("/dev/video0");
+
+	if(argc > 1) {
+		devName = argv[argc-1];
+	}
+
+	bool foundOurs = false;
+
 	try {
 		cout << "Checking out what video devices are attached." << endl;
 		vector <string> devices(videoDevice::enumerateDevices());
 		cout << "Found " << devices.size() << " devices." << endl;
-		if(devices.size() == 0)
-			exit(0);
-		for(vector <string>::iterator it = devices.begin(); it < devices.end(); ++it)
-			cout << "\tFound Device: " << *it << endl;
+
+		for(vector <string>::iterator it = devices.begin(); it < devices.end(); ++it) {
+			cout << "\tFound Device: " << *it;
+			if(*it == devName) {
+				cout << " (Thats the one we'll try to use)";
+				foundOurs = true;
+			}
+			cout << endl;
+		}
 	}
 	catch(string s) {
 		cout << "Error enumerating devices. Oh well." << endl;
 	}
 
-	videoDevice test ("/dev/video0");
+	if(!foundOurs)
+		cout << "Couldn't find specified device " << devName << ". Don't be surprised it we fail!\n" << endl;
+	else
+		cout << endl;
+
+	videoDevice test (devName);
 
 	try {
 		test.init();
 	}
 	catch(string s) {
 		cout << "Init Failed: " << s << endl;
-		exit(1);
+		return 1;
 	}
 
 	cout << "Card name: " << test.getCardName() << endl;
@@ -63,7 +83,7 @@ int main (int argc, char ** argv) {
 	}
 	catch(string s) {
 		cout << "Brightness Information Failed: " << s << endl;
-		exit(1);
+		return 1;
 	}
 
 	vdFrame tFrame;
@@ -78,11 +98,20 @@ int main (int argc, char ** argv) {
 		Magick::Image image(tFrame.width, tFrame.height, "RGB", Magick::CharPixel, tFrame.buffer);
 		image.magick("JPEG");
 		image.write("testImage.jpg");
+		cout << "Jpeg image written to testImage.jpg." << endl;
+		#else
+		fstream file;
+		file.open("testImage.raw",fstream::out | fstream::binary);
+		if(file.good()) {
+			file.write(tFrame.buffer,tFrame.bufferSize);
+			cout << "Raw RGB data written to testImage.raw" << endl;
+		}
+		file.close();
 		#endif
 	}
 	catch(string s) {
 		cout << "Failed to get frame: " << s << endl;
-		exit(1);
+		return 1;
 	}
 
 	return 0;

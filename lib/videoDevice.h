@@ -35,7 +35,7 @@ using std::pair;
 namespace vc {
 
 	//! This is a single frame from the video device.
-	typedef struct vdFrame {
+	struct vdFrame {
 		//! This is the image data in 3 bytes in BGR order.
 		char * buffer;
 		//! Size in bytes of the image data. Should always be 3*width.

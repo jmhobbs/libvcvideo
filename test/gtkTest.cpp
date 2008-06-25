@@ -8,11 +8,13 @@
 
 class Viewer : public Gtk::Window {
 	public:
-		Viewer() : vd("/dev/video0") {
+		Viewer() : vd("/dev/video0"), running(true) {
 			loading.set_text("Initializing Device");
 			add(loading);
 			show_all();
 			Glib::signal_timeout().connect(sigc::mem_fun(*this,&Viewer::init),100);
+			// Got to set our sentinel variable on hide or the camera won't stop
+			signal_hide().connect(sigc::mem_fun(*this,&Viewer::stopCamera));
 		}
 
 	private:
@@ -21,6 +23,7 @@ class Viewer : public Gtk::Window {
 		sigc::connection timer;
 		vc::videoDevice vd;
 		vc::vdFrame frame;
+		bool running;
 
 		bool init () {
 			vd.sig_progress.connect(sigc::mem_fun(*this,&Viewer::signalCatch));
@@ -35,26 +38,34 @@ class Viewer : public Gtk::Window {
 			remove();
 			add(screen);
 			show_all();
+			// Set up a one shot deal to start the stream after realization.
 			timer = Glib::signal_timeout().connect(sigc::mem_fun(*this,&Viewer::refresh),100);
 			return false;
 		}
 
 		bool refresh () {
+			timer.disconnect();
 
-			vd.getFrame(frame);
+			while(running) {
+				vd.getFrame(frame);
 
-			screen.get_window()->draw_rgb_image(
-				screen.get_style()->get_bg_gc(Gtk::STATE_NORMAL),
-				0,
-				0,
-				frame.width,
-				frame.height,
-				Gdk::RGB_DITHER_NONE,
-				(const guchar*) frame.buffer,
-				frame.width*3
-			);
+				screen.get_window()->draw_rgb_image(
+					screen.get_style()->get_bg_gc(Gtk::STATE_NORMAL),
+					0,
+					0,
+					frame.width,
+					frame.height,
+					Gdk::RGB_DITHER_NONE,
+					(const guchar*) frame.buffer,
+					frame.width*3
+				);
 
-			return true;
+				while (Gtk::Main::events_pending ())
+					Gtk::Main::iteration ();
+
+			}
+
+			return false;
 		}
 
 		void signalCatch(int state, std::string msg) {
@@ -63,6 +74,8 @@ class Viewer : public Gtk::Window {
 			while (Gtk::Main::events_pending ())
 				Gtk::Main::iteration ();
 		}
+
+		void stopCamera () { running = false; }
 };
 
 int main (int argc, char *argv[]) {

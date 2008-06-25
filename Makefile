@@ -17,16 +17,33 @@
 # You should have received a copy of the GNU General Public License
 # along with libvcvideo.  If not, see <http://www.gnu.org/licenses/>.
 
+# Capabilities...
+ifeq ($(SIGCPP),NO)
+	SIGCPPCFLAGS =
+	SIGCPPLFLAGS =
+else
+	SIGCPPCFLAGS = -DSIGCPP `pkg-config --cflags sigc++-2.0`
+	SIGCPPLFLAGS = `pkg-config --cflags --libs sigc++-2.0`
+endif
+
+ifeq ($(VCDEBUG),YES)
+	DEBUGCFLAGS = -DVCVIDEO_DEBUG
+else
+	DEBUGCFLAGS =
+endif
+
+ifeq ($(MAGICK),NO)
+	MAGICKCFLAGS =
+	MAGICKLFLAGS =
+else
+	MAGICKCFLAGS = -DHAVE_MAGICK `/usr/bin/Magick++-config --cppflags --cxxflags`
+	MAGICKLFLAGS = `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+endif
+
 # Compiler setup
 CC = g++
-CFLAGS = -Wall -g -I. -DVCVIDEO_DEBUG -DSIGCPP `pkg-config --cflags sigc++-2.0` -DHAVE_MAGICK `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
-LFLAGS = -Wall `pkg-config --cflags --libs sigc++-2.0` `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
-
-# CFLAGS = $(CFLAGS) -DVCVIDEO_DEBUG
-# CFLAGS = $(CFLAGS) -DSIGCPP `pkg-config --cflags sigc++-2.0`
-# LFLAGS = $(LFLAGS) `pkg-config --cflags --libs sigc++-2.0`
-# CFLAGS = $(CFLAGS) -DHAVE_MAGICK `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
-# LFLAGS = $(LFLAGS) `/usr/bin/Magick++-config --cppflags --cxxflags --ldflags --libs`
+CFLAGS = -Wall -g -I. $(DEBUGCFLAGS) $(SIGCPPCFLAGS)
+LFLAGS = -Wall $(SIGCPPLFLAGS) $(MAGICKLFLAGS)
 
 COMPILER = $(CC) $(CFLAGS)
 
@@ -36,7 +53,7 @@ GTKLFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
 # Targets
 TRGT_TEST_PLAIN = lib/videoDevice.o test/vcvTest.o
 testPlain: $(TRGT_TEST_PLAIN)
-	$(COMPILER) $(LFLAGS) $(TRGT_TEST_PLAIN) -o $@
+	$(COMPILER) $(LFLAGS) $(MAGICKLFLAGS) $(TRGT_TEST_PLAIN) -o $@
 
 TRGT_TEST_GTK = lib/videoDevice.o test/gtkTest.o
 testGtk: $(TRGT_TEST_GTK)
@@ -49,7 +66,6 @@ clean:
 	@rm -f lib/*.o
 	@rm -f test/*.o
 	@rm -f testPlain
-	@rm -f testMagick
 	@rm -f testGtk
 	@rm -rf docs/html/*
 
@@ -69,4 +85,7 @@ include dependency.mk
 # Special cases...
 TRGT_TEST_GTKTEST_O = test/gtkTest.cpp lib/videoDevice.h
 test/gtkTest.o: $(TRGT_TEST_GTKTEST_O)
-	$(COMPILER) $(GTKCFLAGS) -c test/gtkTest.cpp -o $@
+	$(COMPILER) $(GTKCFLAGS) -c $< -o $@
+
+test/vcvTest.o: test/vcvTest.cpp lib/videoDevice.h
+		$(COMPILER) $(MAGICKCFLAGS) -c $< -o $@

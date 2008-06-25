@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <string.h>
 
 
 #ifdef VCVIDEO_DEBUG
@@ -827,9 +828,11 @@ namespace vc {
 
 		dp = opendir ("/dev/");
 		if(dp != NULL) {
-			while (ep = readdir(dp)) {
+			ep = readdir(dp);
+			while(ep != NULL) {
 				if(0 == strncmp(ep->d_name,"videoX",5))
 					returnValue.push_back(string("/dev/")+ep->d_name);
+				ep = readdir(dp);
 			}
 			(void) closedir (dp);
 		}

@@ -4,4 +4,6 @@ lib/videoDevice.o: lib/videoDevice.cpp lib/videoDevice.h
 
 test/gtkTest.o: test/gtkTest.cpp lib/videoDevice.h
 
+test/streamServer.o: test/streamServer.cpp lib/videoDevice.h
+
 test/vcvTest.o: test/vcvTest.cpp lib/videoDevice.h
