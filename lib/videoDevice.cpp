@@ -238,7 +238,7 @@ namespace vc {
 
 		// Get the picture information
 		if(-1 == ioctl(fd,VIDIOCGPICT,&v1_controls))
-			throw new string("Can't get image properties.");
+			throw string("Can't get image properties.");
 
 		#ifdef SIGCPP
 		sig_progress.emit(60,"Getting Region");
@@ -457,12 +457,12 @@ namespace vc {
 					break;
 				case SATURATION:
 					if(saturation.flags & V4L2_CTRL_FLAG_DISABLED)
-						throw new string("Saturation control not used on this device.");
+						throw string("Saturation control not used on this device.");
 					get.id = V4L2_CID_SATURATION;
 					break;
 				case HUE:
 					if(hue.flags & V4L2_CTRL_FLAG_DISABLED)
-						throw new string("Hue control not used on this device.");
+						throw string("Hue control not used on this device.");
 					get.id = V4L2_CID_HUE;
 					break;
 				default:
@@ -641,36 +641,61 @@ namespace vc {
 		if(!live)
 			throw string("Device is not initialized.");
 
-		v4l2_queryctrl temp;
-		v4l2_control ctrl;
+		if(isV4L2) {
+			v4l2_queryctrl temp;
+			v4l2_control ctrl;
 
-		switch (controlType) {
-			case BRIGHTNESS:
-				temp = brightness;
-				ctrl.id = V4L2_CID_BRIGHTNESS;
-				break;
-			case CONTRAST:
-				temp = contrast;
-				ctrl.id = V4L2_CID_CONTRAST;
-				break;
-			default:
-				throw string("Invalid integer control type.");
-				break;
+			switch (controlType) {
+				case BRIGHTNESS:
+					temp = brightness;
+					ctrl.id = V4L2_CID_BRIGHTNESS;
+					break;
+				case CONTRAST:
+					temp = contrast;
+					ctrl.id = V4L2_CID_CONTRAST;
+					break;
+				default:
+					throw string("Invalid integer control type.");
+					break;
+			}
+
+			if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
+				throw string("The control is not used on this device.");
+
+			if(-1 == ioctl(fd,VIDIOC_G_CTRL,ctrl))
+				throw string("Could not get the value of the control.");
+
+			if(temp.maximum < value || temp.minimum > value)
+				throw string("New control value out of range.");
+
+			ctrl.value = value;
+
+			if(-1 == ioctl(fd,VIDIOC_S_CTRL,ctrl))
+				throw string("Could not set the value of the control.");
 		}
-
-		if(temp.flags & V4L2_CTRL_FLAG_DISABLED)
-			throw string("The control is not used on this device.");
-
-		if(-1 == ioctl(fd,VIDIOC_G_CTRL,ctrl))
-			throw string("Could not get the value of the control.");
-
-		if(temp.maximum < value || temp.minimum > value)
-			throw string("New control value out of range.");
-
-		ctrl.value = value;
-
-		if(-1 == ioctl(fd,VIDIOC_S_CTRL,ctrl))
-			throw string("Could not set the value of the control.");
+		else {
+			switch(controlType) {
+				case BRIGHTNESS:
+					v1_controls.brightness = value;
+					break;
+				case CONTRAST:
+					v1_controls.contrast = value;
+					break;
+				case HUE:
+					v1_controls.hue = value;
+					break;
+				case SATURATION:
+					throw string("V4L1 does not support saturation.");
+					break;
+				default:
+					throw string("Invalid integer control.");
+					break;
+			}
+			if(-1 == ioctl(fd,VIDIOCSPICT,&v1_controls))
+				throw string("Can't set properties.");
+			if(-1 == ioctl(fd,VIDIOCGPICT,&v1_controls))
+				throw string("Can't get properties.");
+		}
 
 	}
 

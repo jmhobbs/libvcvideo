@@ -14,6 +14,7 @@ class Viewer : public Gtk::Window {
 	public:
 		Viewer() : vd("/dev/video0"), running(true) {
 			set_position(Gtk::WIN_POS_CENTER);
+			set_title("libvcvideo - Gtk Test");
 			loading.set_text("Initializing Device");
 			add(loading);
 			show_all();
@@ -48,7 +49,10 @@ class Viewer : public Gtk::Window {
 			screen.set_size_request(640,480);
 			remove();
 
+			vbox.pack_start(screen,false,false,0);
+
 			if(vd.getIntegerControlUsed(vc::BRIGHTNESS)) {
+				lblBrightness.set_text("Brightness");
 				vbox.pack_start(lblBrightness,false,false,0);
 				sbrightness.set_range(
 					vd.getIntegerControlMinimum(vc::BRIGHTNESS),
@@ -56,12 +60,12 @@ class Viewer : public Gtk::Window {
 				);
 				sbrightness.set_digits(0);
 				sbrightness.set_value(vd.getIntegerControlValue(vc::BRIGHTNESS));
-				sbrightness.set_update_policy(Gtk::UPDATE_DELAYED);
 				sbrightness.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeBrightness));
 				vbox.pack_start(sbrightness,false,false,0);
 			}
 
 			if(vd.getIntegerControlUsed(vc::SATURATION)) {
+				lblSaturation.set_text("Saturation");
 				vbox.pack_start(lblSaturation,false,false,0);
 				ssaturation.set_range(
 					vd.getIntegerControlMinimum(vc::SATURATION),
@@ -69,12 +73,12 @@ class Viewer : public Gtk::Window {
 				);
 				ssaturation.set_digits(0);
 				ssaturation.set_value(vd.getIntegerControlValue(vc::SATURATION));
-				ssaturation.set_update_policy(Gtk::UPDATE_DELAYED);
 				ssaturation.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeSaturation));
 				vbox.pack_start(ssaturation,false,false,0);
 			}
 
 			if(vd.getIntegerControlUsed(vc::CONTRAST)) {
+				lblContrast.set_text("Contrast");
 				vbox.pack_start(lblContrast,false,false,0);
 				scontrast.set_range(
 					vd.getIntegerControlMinimum(vc::CONTRAST),
@@ -82,12 +86,13 @@ class Viewer : public Gtk::Window {
 				);
 				scontrast.set_digits(0);
 				scontrast.set_value(vd.getIntegerControlValue(vc::CONTRAST));
-				scontrast.set_update_policy(Gtk::UPDATE_DELAYED);
+				//scontrast.set_update_policy(Gtk::UPDATE_DELAYED);
 				scontrast.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeContrast));
 				vbox.pack_start(scontrast,false,false,0);
 			}
 
 			if(vd.getIntegerControlUsed(vc::HUE)) {
+				lblHue.set_text("Hue");
 				vbox.pack_start(lblHue,false,false,0);
 				shue.set_range(
 					vd.getIntegerControlMinimum(vc::HUE),
@@ -95,12 +100,10 @@ class Viewer : public Gtk::Window {
 				);
 				shue.set_digits(0);
 				shue.set_value(vd.getIntegerControlValue(vc::HUE));
-				shue.set_update_policy(Gtk::UPDATE_DELAYED);
 				shue.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeHue));
 				vbox.pack_start(shue,false,false,0);
 			}
 
-			vbox.pack_start(screen,false,false,0);
 			add(vbox);
 			show_all();
 			// Set up a one shot deal to start the stream after realization.
