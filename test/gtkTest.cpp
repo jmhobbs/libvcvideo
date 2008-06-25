@@ -3,12 +3,17 @@
 #include <gtkmm/window.h>
 #include <gtkmm/image.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm/box.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/label.h>
 
 #include "lib/videoDevice.h"
 
 class Viewer : public Gtk::Window {
 	public:
 		Viewer() : vd("/dev/video0"), running(true) {
+			set_position(Gtk::WIN_POS_CENTER);
 			loading.set_text("Initializing Device");
 			add(loading);
 			show_all();
@@ -18,6 +23,9 @@ class Viewer : public Gtk::Window {
 		}
 
 	private:
+		Gtk::VBox vbox;
+		Gtk::HScale sbrightness, ssaturation, scontrast, shue;
+		Gtk::Label lblBrightness, lblSaturation, lblContrast, lblHue;
 		Gtk::ProgressBar loading;
 		Gtk::Image screen;
 		sigc::connection timer;
@@ -32,11 +40,68 @@ class Viewer : public Gtk::Window {
 			}
 			catch(string s) {
 				std::cerr << "Viewer::Viewer() -> " << s << std::endl;
+				Gtk::MessageDialog md(*this,"Could not initialize device.",false,Gtk::MESSAGE_ERROR,Gtk::BUTTONS_OK,true);
+				md.set_title("Error!");
+				md.run();
 				exit(1);
 			}
 			screen.set_size_request(640,480);
 			remove();
-			add(screen);
+
+			if(vd.getIntegerControlUsed(vc::BRIGHTNESS)) {
+				vbox.pack_start(lblBrightness,false,false,0);
+				sbrightness.set_range(
+					vd.getIntegerControlMinimum(vc::BRIGHTNESS),
+					vd.getIntegerControlMaximum(vc::BRIGHTNESS)
+				);
+				sbrightness.set_digits(0);
+				sbrightness.set_value(vd.getIntegerControlValue(vc::BRIGHTNESS));
+				sbrightness.set_update_policy(Gtk::UPDATE_DELAYED);
+				sbrightness.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeBrightness));
+				vbox.pack_start(sbrightness,false,false,0);
+			}
+
+			if(vd.getIntegerControlUsed(vc::SATURATION)) {
+				vbox.pack_start(lblSaturation,false,false,0);
+				ssaturation.set_range(
+					vd.getIntegerControlMinimum(vc::SATURATION),
+					vd.getIntegerControlMaximum(vc::SATURATION)
+				);
+				ssaturation.set_digits(0);
+				ssaturation.set_value(vd.getIntegerControlValue(vc::SATURATION));
+				ssaturation.set_update_policy(Gtk::UPDATE_DELAYED);
+				ssaturation.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeSaturation));
+				vbox.pack_start(ssaturation,false,false,0);
+			}
+
+			if(vd.getIntegerControlUsed(vc::CONTRAST)) {
+				vbox.pack_start(lblContrast,false,false,0);
+				scontrast.set_range(
+					vd.getIntegerControlMinimum(vc::CONTRAST),
+					vd.getIntegerControlMaximum(vc::CONTRAST)
+				);
+				scontrast.set_digits(0);
+				scontrast.set_value(vd.getIntegerControlValue(vc::CONTRAST));
+				scontrast.set_update_policy(Gtk::UPDATE_DELAYED);
+				scontrast.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeContrast));
+				vbox.pack_start(scontrast,false,false,0);
+			}
+
+			if(vd.getIntegerControlUsed(vc::HUE)) {
+				vbox.pack_start(lblHue,false,false,0);
+				shue.set_range(
+					vd.getIntegerControlMinimum(vc::HUE),
+					vd.getIntegerControlMaximum(vc::HUE)
+				);
+				shue.set_digits(0);
+				shue.set_value(vd.getIntegerControlValue(vc::HUE));
+				shue.set_update_policy(Gtk::UPDATE_DELAYED);
+				shue.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeHue));
+				vbox.pack_start(shue,false,false,0);
+			}
+
+			vbox.pack_start(screen,false,false,0);
+			add(vbox);
 			show_all();
 			// Set up a one shot deal to start the stream after realization.
 			timer = Glib::signal_timeout().connect(sigc::mem_fun(*this,&Viewer::refresh),100);
@@ -76,6 +141,42 @@ class Viewer : public Gtk::Window {
 		}
 
 		void stopCamera () { running = false; }
+
+		bool changeBrightness(Gtk::ScrollType type, double value) {
+			try { vd.setIntegerControlValue(vc::BRIGHTNESS,value); }
+			catch(string s) {
+				std::cerr << "Can't change brightness: " << s << std::endl;
+				return false;
+			}
+			return true;
+		}
+
+		bool changeContrast(Gtk::ScrollType type, double value) {
+			try { vd.setIntegerControlValue(vc::CONTRAST,value); }
+			catch(string s) {
+				std::cerr << "Can't change contrast: " << s << std::endl;
+				return false;
+			}
+			return true;
+		}
+
+		bool changeSaturation(Gtk::ScrollType type, double value) {
+			try { vd.setIntegerControlValue(vc::SATURATION,value); }
+			catch(string s) {
+				std::cerr << "Can't change saturation: " << s << std::endl;
+				return false;
+			}
+			return true;
+		}
+
+		bool changeHue(Gtk::ScrollType type, double value) {
+			try { vd.setIntegerControlValue(vc::HUE,value); }
+			catch(string s) {
+				std::cerr << "Can't change hue: " << s << std::endl;
+				return false;
+			}
+			return true;
+		}
 };
 
 int main (int argc, char *argv[]) {
