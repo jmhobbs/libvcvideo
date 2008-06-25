@@ -12,9 +12,9 @@
 
 class Viewer : public Gtk::Window {
 	public:
-		Viewer() : vd("/dev/video0"), running(true) {
+		Viewer(Glib::ustring deviceName) : vd(deviceName), running(true) {
 			set_position(Gtk::WIN_POS_CENTER);
-			set_title("libvcvideo - Gtk Test");
+			set_title("libvcvideo - Gtk Test - "+deviceName);
 			loading.set_text("Initializing Device");
 			add(loading);
 			show_all();
@@ -185,7 +185,10 @@ class Viewer : public Gtk::Window {
 int main (int argc, char *argv[]) {
 
 	Gtk::Main kit (argc, argv);
-	Viewer window;
+	Glib::ustring deviceName("/dev/video0");
+	if(argc > 1)
+		deviceName = argv[argc-1];
+	Viewer window(deviceName);
 	Gtk::Main::run(window);
 	return 0;
 }
