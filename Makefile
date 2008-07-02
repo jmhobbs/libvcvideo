@@ -59,8 +59,10 @@ TRGT_TEST_GTK = lib/videoDevice.o test/gtkTest.o
 testGtk: $(TRGT_TEST_GTK)
 	$(COMPILER) $(GTKLFLAGS) $(TRGT_TEST_GTK) -o $@
 
-docs: lib/videoDevice.h lib/videoDevice.cpp docs/tutorial.dox
-	cd docs && doxygen config.doxy && echo ".fragment { overflow: auto; }" >> html/doxygen.css
+.PHONY: docs clean
+
+docs:
+	cd docs && doxygen config.doxy && echo ".fragment { overflow: auto; }" >> html/doxygen.css #&& cp theme/ftv2folderclosed.png html/
 
 clean:
 	@rm -f lib/*.o

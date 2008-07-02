@@ -1,6 +1,5 @@
 /*!
-	\namespace vc
-	\brief The VelvetCache.org namespace.
+	\namespace vc The VelvetCache.org project namespace.
 
 	All projects started by John Hobbs (john@velvetcache.org) are based in this namespace.
 */
@@ -126,10 +125,10 @@
 	integer value.  The currently supported controls are listed in the vc::vdIntegerControl
 	enumeration.
 
-	The vc::videoDevice::getValidIntegerControls will return a vector of integer controls
-	that you can use on your device. You can then use vc::videoDevice::getIntegerControlMinimum
-	and vc::videoDevice::getIntegerControlMaximum to find the range of the control, and
-	vc::videoDevice::getIntegerControlStep to find the effective step value for it.
+	The \link vc::videoDevice::getValidIntegerControls getValidIntegerControls \endlink will return a vector of integer controls
+	that you can use on your device. You can then use \link vc::videoDevice::getIntegerControlMinimum getIntegerControlMinimum \endlink
+	and \link vc::videoDevice::getIntegerControlMaximum getIntegerControlMaximum \endlink to find the range of the control, and
+	\link vc::videoDevice::getIntegerControlStep getIntegerControlStep \endlink to find the effective step value for it.
 
 	\code
     1   try {
@@ -145,7 +144,8 @@
 	\endcode
 
 	With all this information in hand you can then get and set the control through the
-	vc::videoDevice::getIntegerControlValue and vc::videoDevice::setIntegerControlValue methods.
+	\link vc::videoDevice::getIntegerControlValue getIntegerControlValue \endlink and
+	\link vc::videoDevice::setIntegerControlValue setIntegerControlValue \endlink methods.
 
 	\code
     1   try {
@@ -164,10 +164,10 @@
 
 	\section Signals Signals
 	Signals using libsigc++2 can optionally be built into libvcvideo. If you do
-	build them in you are provided with the useful vc::videoDevice::sig_progress.
+	build them in you are provided with the useful \link vc::videoDevice::sig_progress sig_progress \endlink.
 	This will give an integer of completion out of 100 and a string of what it is
-	currently doing.  Right now this is only valid for vc::videoDevice::init but
-	it can be very handy.
+	currently doing.  Right now this is only valid for the \link vc::videoDevice::init init \endlink
+	method but it can be very handy.
 
 	<hr>
 	Navigation: \ref Tutorial2 "Back (The Basics)" - \ref main "Home" - \ref Tutorial4 "Next (Integration)"
