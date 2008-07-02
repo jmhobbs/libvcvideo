@@ -71,11 +71,13 @@ namespace vc {
 			videoDevice(string);
 			~videoDevice();
 
-			void init();
+			#ifdef SIGCPP
+			sigc::signal <void,int,string> sig_progress;
+			#endif
 
+			void init();
 			void getFrame(vdFrame &);
 
-			string getCardName();
 			// Controls
 			bool getIntegerControlUsed(const vdIntegerControl);
 			int getIntegerControlValue(const vdIntegerControl);
@@ -86,12 +88,15 @@ namespace vc {
 			static string getIntegerControlString(const vdIntegerControl);
 			vector <vdIntegerControl> getValidIntegerControls();
 
-			bool setDimensions(unsigned int, unsigned int);
-			vector < pair <int,int> > getDimensions();
+			string getCardName();
 
-			#ifdef SIGCPP
-			sigc::signal <void,int,string> sig_progress;
-			#endif
+			bool setDimensions(unsigned int, unsigned int);
+			vector < pair <int,int> > getValidDimensions();
+			pair <int,int> getDimensions();
+
+
+
+			// Static
 
 			static vector <string> enumerateDevices ();
 

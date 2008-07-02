@@ -137,7 +137,7 @@ namespace vc {
 		//! \todo Handle input standards specs?
 		// http://v4l2spec.bytesex.org/spec/x448.htm
 
-		// Since we a re starting with USB cameras they set v4l2_input std to 0
+		// Since we are starting with USB cameras they set v4l2_input std to 0
 		// If it isn't, we bail out.
 		if(0 != v2_inputs[currentInput].std)
 			throw string("Not a USB web camera.");
@@ -318,8 +318,23 @@ namespace vc {
 		sig_progress.emit(100,"Done");
 		#endif
 
-		//! \todo Split this function up into common chunks.
+		//! \todo Split this function up into common chunks. Like the setBufferSize above.
 
+	}
+
+	/*!
+		Set the buffer size for frames.  This should change on capture size change,
+		capture mode change.
+
+		\throws string If this is a V4L2 device, we don't have an implementation yet.
+
+		\todo V4L2 implementation.
+	*/
+	void videoDevice::setBufferSize () {
+		if(isV4L2)
+			throw string("V4L2 Not supported yet.");
+
+		bufferSize = (v1_controls.depth/8)*v1_window.height*v1_window.width;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -332,7 +347,9 @@ namespace vc {
 		\todo V4L2 Implementation.
 		\todo Memory mapping implementation.
 
-		\throws string If device is not initialized or it is a V4L2 device. Also if it has an unsupported format.
+		\throws string If device is not initialized.
+		\throws string If it is a V4L2 device.
+		\throws string If camera uses an unsupported format.
 
 		\param frame The vdFrame struct to store into.
 	*/
@@ -384,10 +401,13 @@ namespace vc {
 	//////////////////////////////// Controls ///////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
 
+
+	/////////////////////////////// INTEGER CONTROLS ////////////////////////////
 	/*!
 		Gets whether the control is used on the device.
 
-		\throws string If device not started or an invalid control is specified.
+		\throws string If device not started.
+		\throws string If an invalid control is specified.
 
 		\param controlType The type of integer control to check.
 		\return True if used.
@@ -432,10 +452,13 @@ namespace vc {
 	/*!
 		Get the current setting of an integer control, if possible.
 
-		\throws string If device not started, the control is not used, or it cannot be retrieved.
+		\throws string If device not started.
+		\throws string If an invalid control is specified.
+		\throws string If that control is not used on this device.
+		\throws string If it can't retrieve the value.
 
 		\param controlType The type of integer control to get.
-		\return The brightness value. Put it into context with getBrightnessMin() and getBrightnessMax().
+		\return The integer control value.
 	*/
 	int videoDevice::getIntegerControlValue (const vdIntegerControl controlType) {
 		if(!live)
@@ -497,7 +520,10 @@ namespace vc {
 	/*!
 		Get the minimum setting of an integer control, if possible.
 
-		\throws string If device not started, the control is not used, or it cannot be retrieved.
+		\throws string If device not started.
+		\throws string If an invalid control is specified.
+		\throws string If that control is not used on this device.
+		\throws string If it can't retrieve the value.
 
 		\param controlType The type of integer control to get.
 		\return The minimum value.
@@ -547,7 +573,10 @@ namespace vc {
 	/*!
 		Get the maximum setting of an integer control, if possible.
 
-		\throws string If device not started, the control is not used, or it cannot be retrieved.
+		\throws string If device not started.
+		\throws string If an invalid control is specified.
+		\throws string If that control is not used on this device.
+		\throws string If it can't retrieve the value.
 
 		\param controlType The type of integer control to get.
 		\return The maximum value.
@@ -595,9 +624,12 @@ namespace vc {
 	}
 
 	/*!
-		Get the minimum effective interval for the brightness setting, if possible.
+		Get the minimum effective interval for an integer control, if possible.
 
-		\throws string If device not started, the control is not used, or it cannot be retrieved.
+		\throws string If device not started.
+		\throws string If an invalid control is specified.
+		\throws string If that control is not used on this device.
+		\throws string If it can't retrieve the value.
 
 		\param controlType The type of integer control to get.
 		\return The minimum effective interval for the brightness value.
@@ -632,7 +664,10 @@ namespace vc {
 	/*!
 		Sets an integer control on the device, if possible.
 
-		\throws string If device not started, the control is not used, the value is out of range, or it cannot be set.
+		\throws string If device not started.
+		\throws string If an invalid control is specified.
+		\throws string If that control is not used on this device.
+		\throws string If it can't setthe value.
 
 		\param controlType The integer control to set.
 		\param value The new brightness value.
@@ -700,6 +735,56 @@ namespace vc {
 	}
 
 	/*!
+		Get what an integer control represents as a "string".
+
+		\throws string On invalid control type.
+
+		\return The name of the control.
+	*/
+	string videoDevice::getIntegerControlString (const vdIntegerControl control) {
+		switch(control) {
+			case BRIGHTNESS: return "Brightness";
+			case CONTRAST: return "Contrast";
+			case SATURATION: return "Saturation";
+			case HUE: return "Hue";
+			default: throw string ("Invalid vdIntegerControl type.");
+		}
+	}
+
+	/*!
+		Gets all integer controls that "should" work on this device.
+		No promises though.
+
+		\throws string If device not initialized.
+		\throws string If V4L2 - Not yet supported.
+
+		\todo Add V4L2 support.
+
+		\return A vector of control types.
+	*/
+	vector <vdIntegerControl> videoDevice::getValidIntegerControls () {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		if(isV4L2)
+			throw string("V4L2 Not supported yet.");
+
+		vector <vdIntegerControl> toReturn;
+
+		try { if(getIntegerControlUsed(BRIGHTNESS)) toReturn.push_back(BRIGHTNESS); } catch (string s) {}
+		try { if(getIntegerControlUsed(CONTRAST)) toReturn.push_back(CONTRAST); } catch (string s) {}
+		try { if(getIntegerControlUsed(SATURATION)) toReturn.push_back(SATURATION); } catch (string s) {}
+		try { if(getIntegerControlUsed(HUE)) toReturn.push_back(HUE); } catch (string s) {}
+
+		return toReturn;
+	}
+	/////////////////////////////// END INTEGER CONTROLS ////////////////////////
+
+
+	/////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////// Other /////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+	/*!
 		Get the card name
 
 		\throws string If device is not initialized.
@@ -764,61 +849,22 @@ namespace vc {
 	}
 
 	/*!
-		Set the buffer size for frames.  This should change on capture size change,
-		capture mode change.
-
-		\throws string If this is a V4L2 device, we don't have an implementation yet.
-
-		\todo V4L2 implementation.
-		\todo Palette based?
-	*/
-	void videoDevice::setBufferSize () {
-		if(isV4L2)
-			throw string("V4L2 Not supported yet.");
-
-		bufferSize = (v1_controls.depth/8)*v1_window.height*v1_window.width;
-	}
-
-	/*!
 		Get the dimensions that the device is capable of capturing in.
 
 		\throws string If device is not initialized.
 
 		\return A vector of pairs of dimensions, pair[0] is width, pair[1] is height.
 	*/
-	vector < pair <int,int> > videoDevice::getDimensions () {
+	vector < pair <int,int> > videoDevice::getValidDimensions () {
 		if(!live)
 			throw string("Device is not initialized.");
 
 		return capableDimensions;
 	}
 
-	string videoDevice::getIntegerControlString (const vdIntegerControl control) {
-		switch(control) {
-			case BRIGHTNESS: return "Brightness";
-			case CONTRAST: return "Contrast";
-			case SATURATION: return "Saturation";
-			case HUE: return "Hue";
-			default: throw string ("Invalid vdIntegerControl type.");
-		}
-	}
-
-	vector <vdIntegerControl> videoDevice::getValidIntegerControls () {
-		if(!live)
-			throw string("Device is not initialized.");
-
-		if(isV4L2)
-			throw string("V4L2 Not supported yet.");
-
-		vector <vdIntegerControl> toReturn;
-
-		try { if(getIntegerControlUsed(BRIGHTNESS)) toReturn.push_back(BRIGHTNESS); } catch (string s) {}
-		try { if(getIntegerControlUsed(CONTRAST)) toReturn.push_back(CONTRAST); } catch (string s) {}
-		try { if(getIntegerControlUsed(SATURATION)) toReturn.push_back(SATURATION); } catch (string s) {}
-		try { if(getIntegerControlUsed(HUE)) toReturn.push_back(HUE); } catch (string s) {}
-
-		return toReturn;
-	}
+	/////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////// Formats ////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 
 	/*!
 		Convert the palette to the default format.
@@ -835,6 +881,11 @@ namespace vc {
 			 frame.buffer[i+2] = temp;
 		}
 	}
+
+
+	/////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////// Static ////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 
 	/*!
 		Attempts to enumerate the devices attached to the system.
