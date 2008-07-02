@@ -1,6 +1,6 @@
 # Makefile for libvcvideo
 
-# Copyright (C) 2008  John Hobbs - john@velvetcache.org
+# Copyright (C) 2008 - SEE "COPYRIGHT" FILE
 #
 # This file is part of libvcvideo.
 #
@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with libvcvideo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Capabilities...
+# Set capabilities...
 ifeq ($(SIGCPP),NO)
 	SIGCPPCFLAGS =
 	SIGCPPLFLAGS =
