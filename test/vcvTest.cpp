@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2008  John Hobbs - john@velvetcache.org
+	Copyright (C) 2008 - SEE "COPYRIGHT" FILE
 
 	This file is part of libvcvideo.
 
@@ -15,6 +15,13 @@
 
 	You should have received a copy of the GNU General Public License
 	along with libvcvideo.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+	This is a simple test program.
+	It opens up a device (you can specify which on the command line) and grabs
+	one frame.  If you built it with libmagick++ it will save it as a jpeg.
+	Otherwise it just save the raw data.
 */
 #include <iostream>
 #include <string>

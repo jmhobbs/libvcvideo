@@ -7,6 +7,9 @@ TEAL="\E[01;36m"
 BLUE="\E[01;34m"
 GREEN="\E[01;32m"
 
+echo -e "${RED}libvcvideo is not a shared library yet. Please link manually if you want to try it out, or wait a few more revisions.${DEFAULT}"
+exit 0
+
 if [ $(whoami) != "root" ]; then
   echo -e "${RED}This script must be run as root.${DEFAULT}"
   exit 1

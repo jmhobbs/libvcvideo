@@ -5,17 +5,15 @@ most amateur programmers and basic applications. The core targeted devices are
 USB webcams, hopefully with capabilities expanding over time to include tuner
 devices as well.
 
-Currently the library is linux compatible only.
+Currently the library is Linux compatible only, and only specific V4L1 devices.
+Currently this is NOT a shared library, please link manually or wait a few more revisions.
 
 libvcvideo is released under the GNU Public License v3.
 
-To install or update the library, just run the install.sh script with root privileges.
-
-
 -------------------------------[DEPENDENCIES]-----------------------------------
 
-A modern kernel with v4l2.
-
+A modern kernel with V4L.
+A video device.
 
 -----------------------------------[LINKS]--------------------------------------
 
@@ -26,6 +24,9 @@ A modern kernel with v4l2.
 
 This library would not exist without the wonderful documentation of V4L2
   - http://linuxtv.org/v4lwiki/index.php/Main_Page
+
+And the mediocre documentation of V4L :-)
+  - http://www.linuxtv.org/downloads/video4linux/API/V4L1_API.html
 
 I was also inspired through the use of OpenCV
   - http://opencvlibrary.sourceforge.net/

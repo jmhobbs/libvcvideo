@@ -1,0 +1,21 @@
+Currently this is NOT a shared library, please link manually or wait a few more revisions.
+
+You can build some test programs with:
+make testPlain
+make testGtk
+
+Or you can just build the library with:
+make lib/videoDevice.o
+
+If you don't have libsigc++ installed, build without it:
+SIGCPP='NO' make lib/videoDevice.o
+
+If you don't have magick++ installed, your "testPlain" build will fail. Build with:
+MAGICK='NO' make testPlain
+
+If you want debug output (goes to cerr) build the library with:
+VCDEBUG='YES' make lib/videoDevice.o
+
+If you have doxygen and want to make your own copy of the API documentation, be in the
+root of the project and run:
+make docs

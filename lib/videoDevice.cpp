@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2008  John Hobbs - john@velvetcache.org
+	Copyright (C) 2008 - SEE "COPYRIGHT" FILE
 
 	This file is part of libvcvideo.
 
