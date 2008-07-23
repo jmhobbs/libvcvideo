@@ -26,9 +26,35 @@ namespace vc {
 			throw std::string("Cannot load plugin: "+std::string(g_module_error()));
 
 		// Load symbols...
+		// Name is a special case, we want to check for already loaded ones.
 		if (!g_module_symbol(module, "effect_name", (gpointer *)&(tempEffect.name))) {
 			g_module_close(module);
-			throw std::string("Cannot load effect_get symbol.");
+			throw std::string("Cannot load effect_name symbol.");
+		}
+		if(registeredEffects.end() != registeredEffects.find(tempEffect.name())) {
+			g_module_close(module);
+			return;
+		}
+		// Now that we know it is new, do the rest of them.
+		if (!g_module_symbol(module, "effect_description", (gpointer *)&(tempEffect.description))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_description symbol.");
+		}
+		if (!g_module_symbol(module, "effect_version", (gpointer *)&(tempEffect.version))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_version symbol.");
+		}
+		if (!g_module_symbol(module, "effect_init", (gpointer *)&(tempEffect.init))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_init symbol.");
+		}
+		if (!g_module_symbol(module, "effect_deinit", (gpointer *)&(tempEffect.deinit))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_deinit symbol.");
+		}
+		if (!g_module_symbol(module, "effect_apply", (gpointer *)&(tempEffect.apply))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_apply symbol.");
 		}
 
 		// Check symbols...
@@ -36,17 +62,51 @@ namespace vc {
 			g_module_close(module);
 			throw std::string("Name symbol is NULL.");
 		}
-		g_module_make_resident(module);
+		if (tempEffect.name == NULL) {
+			g_module_close(module);
+			throw std::string("Description symbol is NULL.");
+		}
+		if (tempEffect.version == NULL) {
+			g_module_close(module);
+			throw std::string("Version symbol is NULL.");
+		}
+		if (tempEffect.init == NULL) {
+			g_module_close(module);
+			throw std::string("Init symbol is NULL.");
+		}
+		if (tempEffect.deinit == NULL) {
+			g_module_close(module);
+			throw std::string("Deinit symbol is NULL.");
+		}
+		if (tempEffect.apply == NULL) {
+			g_module_close(module);
+			throw std::string("Apply symbol is NULL.");
+		}
 
 		registeredEffects.insert(std::pair<std::string,effect>(tempEffect.name(),tempEffect));
+		g_module_make_resident(module);
 
 	}
 
-	std::string effects::toString () {
-		std::string effectsReg("Registered effects by name: ");
+	std::vector<std::string> effects::getEffectNames () {
+		std::vector<std::string> returnValue;
  		for(std::map<std::string,effect>::iterator it = registeredEffects.begin() ; it != registeredEffects.end(); it++ )
-    	effectsReg += "'"+it->first+"' ";
-		return effectsReg;
+    	returnValue.push_back(it->first);
+		return returnValue;
+	}
+
+	std::string effects::getEffectDescription (std::string _name) {
+		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
+		if(registeredEffects.end() == it)
+			throw std::string ("Effect not found.");
+		return it->second.description();
+	}
+
+	double effects::getEffectVersion (std::string _name) {
+		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
+		if(registeredEffects.end() == it)
+			throw std::string ("Effect not found.");
+		return it->second.version();
 	}
 
 }

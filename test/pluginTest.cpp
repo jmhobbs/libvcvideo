@@ -1,4 +1,7 @@
 #include <iostream>
+#include <vector>
+#include <string>
+
 #include "effect/effects.h"
 
 int main (int argc, char ** argv) {
@@ -10,9 +13,22 @@ int main (int argc, char ** argv) {
 
 	vc::effects * eff = vc::effects::instance();
 
-	for(int i = 1; i < argc; ++i)
-		eff->registerEffect(argv[i]);
+	for(int i = 1; i < argc; ++i) {
+		try {
+			eff->registerEffect(argv[i]);
+		}
+		catch (std::string s) {
+			std::cerr << "Error loading " << argv[i] <<"\n\t" << s << std::endl;
+		}
+	}
 
-	std::cout << eff->toString() << std::endl;
-
+	std::vector<std::string> regFX = eff->getEffectNames();
+	std::cout << "\n---[Registered effects]---" << std::endl;
+	for(std::vector<std::string>::iterator it = regFX.begin(); it != regFX.end(); ++it) {
+		std::cout << "\nName        : " << (*it) << std::endl;
+		std::cout << "Version     : " << eff->getEffectVersion(*it) << std::endl;
+		//std::cout << "Author      : " << eff->getEffectAuthor(*it) << std::endl;
+		//std::cout << "Website     : " << eff->getEffectWebsite(*it) << std::endl;
+		std::cout << "Description : " << eff->getEffectDescription(*it) << std::endl;
+	}
 }
