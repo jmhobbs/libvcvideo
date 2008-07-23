@@ -42,10 +42,16 @@ endif
 
 # Compiler setup
 CC = g++
-CFLAGS = -Wall -g -I. $(DEBUGCFLAGS) $(SIGCPPCFLAGS)
+CFLAGS = -Wall -g -fPIC -I. $(DEBUGCFLAGS) $(SIGCPPCFLAGS)
 LFLAGS = -Wall $(SIGCPPLFLAGS) $(MAGICKLFLAGS)
 
 COMPILER = $(CC) $(CFLAGS)
+
+GMODULECFLAGS = `pkg-config gmodule-2.0 --cflags`
+GMODULEFLAGS = `pkg-config gmodule-2.0 --libs`
+
+# Effect plugins setup
+EFFECTFLAGS = -shared -lc
 
 GTKCFLAGS = `pkg-config gtkmm-2.4 --cflags`
 GTKLFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
@@ -59,6 +65,10 @@ TRGT_TEST_GTK = lib/videoDevice.o test/gtkTest.o
 testGtk: $(TRGT_TEST_GTK)
 	$(COMPILER) $(GTKLFLAGS) $(TRGT_TEST_GTK) -o $@
 
+TRGT_TEST_PLUGIN = test/pluginTest.o effect/effects.o
+pluginTest: $(TRGT_TEST_PLUGIN)
+	$(COMPILER) $(LFLAGS) $(GMODULEFLAGS) $(TRGT_TEST_PLUGIN) -o $@
+
 .PHONY: docs clean
 
 docs:
@@ -70,6 +80,9 @@ clean:
 	@rm -f testPlain
 	@rm -f testGtk
 	@rm -rf docs/html/*
+	@rm -f effect/*.o
+	@rm -f effect/effects/*.o
+	@rm -f effect/effects/*.so
 
 # Object targets
 .SUFFIXES : .cpp .o .h
@@ -81,6 +94,8 @@ depend:
 	@echo '# Do not change this file unless you know what you are doing. Use make gendeps instead.' > dependency.mk
 	g++ -I. -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
 	g++ -I. -MM test/*.cpp | sed 's/^\([a-zA-Z]\)/\ntest\/\1/' >> dependency.mk
+	g++ -I. -MM effect/*.cpp | sed 's/^\([a-zA-Z]\)/\neffect\/\1/' >> dependency.mk
+	g++ -I. -MM effect/effects/*.cpp | sed 's/^\([a-zA-Z]\)/\neffect\/effects\/\1/' >> dependency.mk
 
 include dependency.mk
 
@@ -90,4 +105,16 @@ test/gtkTest.o: $(TRGT_TEST_GTKTEST_O)
 	$(COMPILER) $(GTKCFLAGS) -c $< -o $@
 
 test/vcvTest.o: test/vcvTest.cpp lib/videoDevice.h
-		$(COMPILER) $(MAGICKCFLAGS) -c $< -o $@
+	$(COMPILER) $(MAGICKCFLAGS) -c $< -o $@
+
+test/pluginTest.o: test/pluginTest.cpp effect/effects.h
+	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
+
+# Plugins
+plugins: effect/effects/example.so
+
+effect/effects.o: effect/effects.cpp effect/effects.h
+	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
+
+effect/effects/example.so: effect/effects/example.o
+	$(CC) $(EFFECTFLAGS) $< -o $@
