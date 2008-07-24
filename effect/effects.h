@@ -39,6 +39,7 @@ namespace vc {
 
 			std::string getEffectDescription (std::string);
 			double getEffectVersion (std::string);
+			void applyEffect (std::string, vc::vdFrame &);
 
 		protected:
 			effects ();

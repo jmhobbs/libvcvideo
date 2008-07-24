@@ -31,4 +31,11 @@ int main (int argc, char ** argv) {
 		//std::cout << "Website     : " << eff->getEffectWebsite(*it) << std::endl;
 		std::cout << "Description : " << eff->getEffectDescription(*it) << std::endl;
 	}
+
+	vc::vdFrame tFrame;
+	tFrame.width = 640;
+	tFrame.height = 480;
+	tFrame.bufferSize = 921600;
+	tFrame.buffer = new char [tFrame.bufferSize];
+
 }

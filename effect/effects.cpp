@@ -109,4 +109,12 @@ namespace vc {
 		return it->second.version();
 	}
 
+	void effects::applyEffect (std::string _name, vc::vdFrame & _frame) {
+		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
+		if(registeredEffects.end() == it)
+			throw std::string ("Effect not found.");
+		std::vector<effectArgument> temp;
+		it->second.apply(_frame, temp);
+	}
+
 }

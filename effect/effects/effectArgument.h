@@ -3,14 +3,14 @@
 
 #include <string>
 
-typedef enum effectArgumentType {
+enum effectArgumentType {
 	BOOLEAN,
 	INTEGER,
 	DOUBLE,
 	STRING
 };
 
-typedef struct effectArgument {
+struct effectArgument {
 	std::string name;
 	effectArgumentType type;
 	bool _boolean;

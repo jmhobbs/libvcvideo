@@ -111,10 +111,16 @@ test/pluginTest.o: test/pluginTest.cpp effect/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
 # Plugins
-plugins: effect/effects/example.so
+plugins: effect/effects/example.so effect/effects/testPattern.so effect/effects/mirror.so
 
 effect/effects.o: effect/effects.cpp effect/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
 effect/effects/example.so: effect/effects/example.o
+	$(CC) $(EFFECTFLAGS) $< -o $@
+
+effect/effects/testPattern.so: effect/effects/testPattern.o
+	$(CC) $(EFFECTFLAGS) $< -o $@
+
+effect/effects/mirror.so: effect/effects/mirror.o
 	$(CC) $(EFFECTFLAGS) $< -o $@

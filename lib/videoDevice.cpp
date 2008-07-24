@@ -354,6 +354,8 @@ namespace vc {
 		\param frame The vdFrame struct to store into.
 	*/
 	void videoDevice::getFrame (vdFrame & frame) {
+		//! \todo Timestamp!
+
 		if(!live)
 			throw string("Device not initialized.");
 
