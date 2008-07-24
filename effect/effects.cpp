@@ -68,6 +68,10 @@ namespace vc {
 			g_module_close(module);
 			throw std::string("Cannot load effect_apply symbol.");
 		}
+		if (!g_module_symbol(module, "effect_arguments", (gpointer *)&(tempEffect.arguments))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_arguments symbol.");
+		}
 
 		// Check symbols...
 		if (tempEffect.name == NULL) {
@@ -93,6 +97,10 @@ namespace vc {
 		if (tempEffect.apply == NULL) {
 			g_module_close(module);
 			throw std::string("Apply symbol is NULL.");
+		}
+		if (tempEffect.arguments == NULL) {
+			g_module_close(module);
+			throw std::string("Arguments symbol is NULL.");
 		}
 
 		registeredEffects.insert(std::pair<std::string,effect>(tempEffect.name(),tempEffect));
@@ -150,4 +158,10 @@ namespace vc {
 		it->second.apply(_frame, temp);
 	}
 
+	std::vector<effectArgument> effects::getArguments (std::string _name) {
+		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
+		if(registeredEffects.end() == it)
+			throw std::string ("Effect not found.");
+		return it->second.arguments();
+	}
 }

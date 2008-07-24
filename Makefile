@@ -57,17 +57,19 @@ GTKCFLAGS = `pkg-config gtkmm-2.4 --cflags`
 GTKLFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
 
 # Targets
-TRGT_TEST_PLAIN = lib/videoDevice.o test/vcvTest.o
-testPlain: $(TRGT_TEST_PLAIN)
-	$(COMPILER) $(LFLAGS) $(MAGICKLFLAGS) $(TRGT_TEST_PLAIN) -o $@
+bins: vcvTest gtkTest effectInformation
 
-TRGT_TEST_GTK = lib/videoDevice.o test/gtkTest.o
-testGtk: $(TRGT_TEST_GTK)
-	$(COMPILER) $(GTKLFLAGS) $(TRGT_TEST_GTK) -o $@
+TRGT_BIN_PLAIN = lib/videoDevice.o bin/vcvTest.o
+vcvTest: $(TRGT_BIN_PLAIN)
+	$(COMPILER) $(LFLAGS) $(MAGICKLFLAGS) $(TRGT_BIN_PLAIN) -o bin/$@
 
-TRGT_TEST_PLUGIN = test/pluginTest.o effect/effects.o
-pluginTest: $(TRGT_TEST_PLUGIN)
-	$(COMPILER) $(LFLAGS) $(GMODULEFLAGS) $(TRGT_TEST_PLUGIN) -o $@
+TRGT_BIN_GTK = lib/videoDevice.o bin/gtkTest.o
+gtkTest: $(TRGT_BIN_GTK)
+	$(COMPILER) $(GTKLFLAGS) $(TRGT_BIN_GTK) -o bin/$@
+
+TRGT_BIN_EFFECT = bin/effectInformation.o effect/effects.o
+effectInformation: $(TRGT_BIN_EFFECT)
+	$(COMPILER) $(LFLAGS) $(GMODULEFLAGS) $(TRGT_BIN_EFFECT) -o bin/$@
 
 .PHONY: docs clean
 
@@ -76,9 +78,9 @@ docs:
 
 clean:
 	@rm -f lib/*.o
-	@rm -f test/*.o
-	@rm -f testPlain
-	@rm -f testGtk
+	@rm -f bin/*.o
+	@rm -f vcvTest
+	@rm -f gtkTest
 	@rm -rf docs/html/*
 	@rm -f effect/*.o
 	@rm -f effect/effects/*.o
@@ -93,25 +95,26 @@ clean:
 depend:
 	@echo '# Do not change this file unless you know what you are doing. Use make gendeps instead.' > dependency.mk
 	g++ -I. -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
-	g++ -I. -MM test/*.cpp | sed 's/^\([a-zA-Z]\)/\ntest\/\1/' >> dependency.mk
+	g++ -I. -MM bin/*.cpp | sed 's/^\([a-zA-Z]\)/\nbin\/\1/' >> dependency.mk
 	g++ -I. -MM effect/*.cpp | sed 's/^\([a-zA-Z]\)/\neffect\/\1/' >> dependency.mk
 	g++ -I. -MM effect/effects/*.cpp | sed 's/^\([a-zA-Z]\)/\neffect\/effects\/\1/' >> dependency.mk
 
 include dependency.mk
 
 # Special cases...
-TRGT_TEST_GTKTEST_O = test/gtkTest.cpp lib/videoDevice.h
-test/gtkTest.o: $(TRGT_TEST_GTKTEST_O)
+TRGT_BIN_GTKTEST_O = bin/gtkTest.cpp lib/videoDevice.h
+bin/gtkTest.o: $(TRGT_BIN_GTKTEST_O)
 	$(COMPILER) $(GTKCFLAGS) -c $< -o $@
 
-test/vcvTest.o: test/vcvTest.cpp lib/videoDevice.h
+bin/vcvTest.o: bin/vcvTest.cpp lib/videoDevice.h
 	$(COMPILER) $(MAGICKCFLAGS) -c $< -o $@
 
-test/pluginTest.o: test/pluginTest.cpp effect/effects.h
+bin/effectInformation.o: bin/effectInformation.cpp effect/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
 # Plugins
-plugins: effect/effects/example.so effect/effects/testPattern.so effect/effects/mirror.so
+plugins: effect/effects/example.so effect/effects/testPattern.so effect/effects/mirror.so \
+effect/effects/vmirror.so
 
 effect/effects.o: effect/effects.cpp effect/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
@@ -123,4 +126,7 @@ effect/effects/testPattern.so: effect/effects/testPattern.o
 	$(CC) $(EFFECTFLAGS) $< -o $@
 
 effect/effects/mirror.so: effect/effects/mirror.o
+	$(CC) $(EFFECTFLAGS) $< -o $@
+
+effect/effects/vmirror.so: effect/effects/vmirror.o
 	$(CC) $(EFFECTFLAGS) $< -o $@

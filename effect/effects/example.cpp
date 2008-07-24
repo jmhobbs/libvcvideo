@@ -30,3 +30,12 @@ extern "C" bool effect_deinit () { return true; }
 	value.
 */
 extern "C" void effect_apply (vc::vdFrame & applyTo, std::vector<effectArgument> args) {}
+/*
+	Each plugin is queried for it's arguments which are sent back as a vector of effectArgument structs.
+	The important fields here are name, description and type.
+*/
+extern "C" std::vector<effectArgument> effect_arguments () {
+	std::vector<effectArgument> ret;
+	ret.push_back(effectArgument("Example Argument","Doesn't do anything.",BOOLEAN));
+	return ret;
+}

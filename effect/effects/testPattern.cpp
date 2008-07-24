@@ -31,3 +31,8 @@ extern "C" void effect_apply (vc::vdFrame & frame, std::vector<effectArgument> a
 		frame.buffer[j+2] = 0;
 	}
 }
+
+extern "C" std::vector<effectArgument> effect_arguments () {
+	std::vector<effectArgument> ret;
+	return ret;
+}

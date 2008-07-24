@@ -21,6 +21,7 @@ namespace vc {
 	typedef bool (* effect_init) (vdFrame &);
 	typedef bool (* effect_deinit) ();
 	typedef void (* effect_apply) (vdFrame &, std::vector<effectArgument>);
+	typedef std::vector<effectArgument> (* effect_arguments) ();
 
 	struct effect {
 		effect_name name;
@@ -32,6 +33,7 @@ namespace vc {
 		effect_init init;
 		effect_deinit deinit;
 		effect_apply apply;
+		effect_arguments arguments;
 	};
 
 	class effects {
@@ -49,6 +51,7 @@ namespace vc {
 			std::string getEffectWebsite (std::string);
 			std::string getEffectContact (std::string);
 
+			std::vector<effectArgument> getArguments(std::string);
 			void applyEffect (std::string, vc::vdFrame &);
 
 		protected:
