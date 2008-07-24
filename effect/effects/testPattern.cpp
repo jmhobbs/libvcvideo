@@ -6,7 +6,11 @@
 
 extern "C" std::string effect_name () { return "Test Pattern"; }
 extern "C" std::string effect_description () { return "This is an example libvcvideo plugin. It replaces the frame with a test pattern."; }
+extern "C" std::string effect_author () { return "John Hobbs"; }
+extern "C" std::string effect_website () { return "http://www.velvetcache.org/"; }
+extern "C" std::string effect_contact () { return "john@velvetcache.org"; }
 extern "C" double effect_version () { return 1.0; }
+
 extern "C" bool effect_init (vc::vdFrame & initFrame) { /* Nothing to init. */ return true; }
 extern "C" bool effect_deinit () { /* Nothing to deinit. */ return true; }
 extern "C" void effect_apply (vc::vdFrame & frame, std::vector<effectArgument> args) {

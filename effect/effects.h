@@ -14,6 +14,9 @@ namespace vc {
 
 	typedef std::string (* effect_name) ();
 	typedef std::string (* effect_description) ();
+	typedef std::string (* effect_author) ();
+	typedef std::string (* effect_website) ();
+	typedef std::string (* effect_contact) ();
 	typedef double (* effect_version) ();
 	typedef bool (* effect_init) (vdFrame &);
 	typedef bool (* effect_deinit) ();
@@ -22,6 +25,9 @@ namespace vc {
 	struct effect {
 		effect_name name;
 		effect_description description;
+		effect_author author;
+		effect_website website;
+		effect_contact contact;
 		effect_version version;
 		effect_init init;
 		effect_deinit deinit;
@@ -39,6 +45,10 @@ namespace vc {
 
 			std::string getEffectDescription (std::string);
 			double getEffectVersion (std::string);
+			std::string getEffectAuthor (std::string);
+			std::string getEffectWebsite (std::string);
+			std::string getEffectContact (std::string);
+
 			void applyEffect (std::string, vc::vdFrame &);
 
 		protected:

@@ -27,8 +27,9 @@ int main (int argc, char ** argv) {
 	for(std::vector<std::string>::iterator it = regFX.begin(); it != regFX.end(); ++it) {
 		std::cout << "\nName        : " << (*it) << std::endl;
 		std::cout << "Version     : " << eff->getEffectVersion(*it) << std::endl;
-		//std::cout << "Author      : " << eff->getEffectAuthor(*it) << std::endl;
-		//std::cout << "Website     : " << eff->getEffectWebsite(*it) << std::endl;
+		std::cout << "Author      : " << eff->getEffectAuthor(*it) << std::endl;
+		std::cout << "Contact     : " << eff->getEffectContact(*it) << std::endl;
+		std::cout << "Website     : " << eff->getEffectWebsite(*it) << std::endl;
 		std::cout << "Description : " << eff->getEffectDescription(*it) << std::endl;
 	}
 

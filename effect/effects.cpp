@@ -13,7 +13,7 @@ namespace vc {
 	effects::effects () { /* Nothing to do... */ }
 
 	void effects::populateRegistry () {
-		// TODO: Look in default plugin path and load up plugins
+		//! \todo Look in default plugin path and load up plugins
 	}
 
 	void effects::registerEffect (std::string filename) {
@@ -39,6 +39,18 @@ namespace vc {
 		if (!g_module_symbol(module, "effect_description", (gpointer *)&(tempEffect.description))) {
 			g_module_close(module);
 			throw std::string("Cannot load effect_description symbol.");
+		}
+		if (!g_module_symbol(module, "effect_author", (gpointer *)&(tempEffect.author))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_author symbol.");
+		}
+		if (!g_module_symbol(module, "effect_website", (gpointer *)&(tempEffect.website))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_website symbol.");
+		}
+		if (!g_module_symbol(module, "effect_contact", (gpointer *)&(tempEffect.contact))) {
+			g_module_close(module);
+			throw std::string("Cannot load effect_contact symbol.");
 		}
 		if (!g_module_symbol(module, "effect_version", (gpointer *)&(tempEffect.version))) {
 			g_module_close(module);
@@ -107,6 +119,27 @@ namespace vc {
 		if(registeredEffects.end() == it)
 			throw std::string ("Effect not found.");
 		return it->second.version();
+	}
+
+	std::string effects::getEffectAuthor (std::string _name) {
+		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
+		if(registeredEffects.end() == it)
+			throw std::string ("Effect not found.");
+		return it->second.author();
+	}
+
+	std::string effects::getEffectContact (std::string _name) {
+		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
+		if(registeredEffects.end() == it)
+			throw std::string ("Effect not found.");
+		return it->second.contact();
+	}
+
+	std::string effects::getEffectWebsite (std::string _name) {
+		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
+		if(registeredEffects.end() == it)
+			throw std::string ("Effect not found.");
+		return it->second.website();
 	}
 
 	void effects::applyEffect (std::string _name, vc::vdFrame & _frame) {
