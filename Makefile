@@ -79,8 +79,9 @@ docs:
 clean:
 	@rm -f lib/*.o
 	@rm -f bin/*.o
-	@rm -f vcvTest
-	@rm -f gtkTest
+	@rm -f bin/vcvTest
+	@rm -f bin/gtkTest
+	@rm -f bin/effectInformation
 	@rm -rf docs/html/*
 	@rm -f effect/*.o
 	@rm -f effect/effects/*.o

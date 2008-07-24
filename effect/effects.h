@@ -23,6 +23,7 @@ namespace vc {
 	typedef void (* effect_apply) (vdFrame &, std::vector<effectArgument>);
 	typedef std::vector<effectArgument> (* effect_arguments) ();
 
+	//! This is a representation of a loaded effect plugin. All the members are function pointers.
 	struct effect {
 		effect_name name;
 		effect_description description;
@@ -36,11 +37,12 @@ namespace vc {
 		effect_arguments arguments;
 	};
 
+	//! The effects class manages and applies plugin effects.
 	class effects {
 		public:
 			static effects * instance ();
+
 			void populateRegistry ();
-			void apply ();
 			void registerEffect (std::string);
 
 			std::vector<std::string> getEffectNames ();
@@ -51,8 +53,9 @@ namespace vc {
 			std::string getEffectWebsite (std::string);
 			std::string getEffectContact (std::string);
 
-			std::vector<effectArgument> getArguments(std::string);
+			std::vector<effectArgument> getArguments (std::string);
 			void applyEffect (std::string, vc::vdFrame &);
+			void applyEffect (std::string, vc::vdFrame &, std::vector<effectArgument>);
 
 		protected:
 			effects ();

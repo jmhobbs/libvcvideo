@@ -47,8 +47,7 @@ namespace vc {
 	};
 
 	/*!
-		\class videoDevice
-		\brief The core videoDevice object.
+		The core videoDevice object.
 
 		This devices accesses the attached hardware through the appropriate
 		interfaces and simplifies interaction through a smaller, unified API.

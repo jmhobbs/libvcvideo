@@ -4,6 +4,10 @@ namespace vc {
 
 	effects * effects::pinstance = NULL;
 
+	/*!
+		Because the effects class is a singleton, it must be accessed with a pointer
+		and not a "real" object. Use this class to get a reference to the object.
+	*/
 	effects * effects::instance () {
 		if(pinstance == NULL)
 			pinstance = new effects();
@@ -12,10 +16,20 @@ namespace vc {
 
 	effects::effects () { /* Nothing to do... */ }
 
-	void effects::populateRegistry () {
-		//! \todo Look in default plugin path and load up plugins
-	}
+	/*!
+		This method searches the default plugin path for effects and loads them.
 
+		\todo Implement
+	*/
+	void effects::populateRegistry () {}
+
+	/*!
+		This method attempts to register a given effect.
+
+		\throws string On any failure to load the effect.
+
+		\param filename The path to the plugin.
+	*/
 	void effects::registerEffect (std::string filename) {
 
 		effect tempEffect;
@@ -108,6 +122,11 @@ namespace vc {
 
 	}
 
+	/*!
+		Gets a listing of all registered effects by name.
+
+		\return An std::vector of std::strings with the effect names in them.
+	*/
 	std::vector<std::string> effects::getEffectNames () {
 		std::vector<std::string> returnValue;
  		for(std::map<std::string,effect>::iterator it = registeredEffects.begin() ; it != registeredEffects.end(); it++ )
@@ -115,6 +134,14 @@ namespace vc {
 		return returnValue;
 	}
 
+	/*!
+		Attempts to get an effects description.
+
+		\throws string If effect not registered.
+
+		\param _name The name of the effect.
+		\return The description of the effect.
+	*/
 	std::string effects::getEffectDescription (std::string _name) {
 		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
 		if(registeredEffects.end() == it)
@@ -122,6 +149,14 @@ namespace vc {
 		return it->second.description();
 	}
 
+	/*!
+		Attempts to get an effects version.
+
+		\throws string If effect not registered.
+
+		\param _name The name of the effect.
+		\return The version of the effect.
+	*/
 	double effects::getEffectVersion (std::string _name) {
 		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
 		if(registeredEffects.end() == it)
@@ -129,6 +164,14 @@ namespace vc {
 		return it->second.version();
 	}
 
+	/*!
+		Attempts to get an effects author.
+
+		\throws string If effect not registered.
+
+		\param _name The name of the effect.
+		\return The author of the effect.
+	*/
 	std::string effects::getEffectAuthor (std::string _name) {
 		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
 		if(registeredEffects.end() == it)
@@ -136,6 +179,14 @@ namespace vc {
 		return it->second.author();
 	}
 
+	/*!
+		Attempts to get an effects contact address.
+
+		\throws string If effect not registered.
+
+		\param _name The name of the effect.
+		\return The contact address of the effect.
+	*/
 	std::string effects::getEffectContact (std::string _name) {
 		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
 		if(registeredEffects.end() == it)
@@ -143,6 +194,14 @@ namespace vc {
 		return it->second.contact();
 	}
 
+	/*!
+		Attempts to get an effects website.
+
+		\throws string If effect not registered.
+
+		\param _name The name of the effect.
+		\return The website of the effect.
+	*/
 	std::string effects::getEffectWebsite (std::string _name) {
 		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
 		if(registeredEffects.end() == it)
@@ -150,14 +209,46 @@ namespace vc {
 		return it->second.website();
 	}
 
+	/*!
+		Applys an effect to a frame without arguments.
+
+		\throws string Pass through from fully specified version.
+
+		\param _name The name of the effect.
+		\param _frame The frame to work on.
+	*/
 	void effects::applyEffect (std::string _name, vc::vdFrame & _frame) {
+		std::vector<effectArgument> temp;
+		try
+			applyEffect(_name, _frame, temp);
+		catch (std::string s)
+			throw s;
+	}
+
+	/*!
+		Applys an effect to a frame.
+
+		\throws string If effect not registered.
+
+		\param _name The name of the effect.
+		\param _frame The frame to work on.
+		\param args The argument list to use.
+	*/
+	void effects::applyEffect (std::string _name, vc::vdFrame & _frame, std::vector<effectArgument> args) {
 		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
 		if(registeredEffects.end() == it)
 			throw std::string ("Effect not found.");
-		std::vector<effectArgument> temp;
-		it->second.apply(_frame, temp);
+		it->second.apply(_frame, args);
 	}
 
+	/*!
+		Get's a listing of arguments for an effect.
+
+		\throws string If effect not registered.
+
+		\param _name The name of the effect.
+		\return A std::vector of effectArgument structs. The name, description and type fields will be filled.
+	*/
 	std::vector<effectArgument> effects::getArguments (std::string _name) {
 		std::map<std::string,effect>::iterator it = registeredEffects.find(_name);
 		if(registeredEffects.end() == it)

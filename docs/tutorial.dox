@@ -22,6 +22,9 @@
 	- \subpage Tutorial4
 	  - \ref Tutorial4gtkmm
 	  - \ref Tutorial4magick
+	- \subpage Tutorial5
+		- \ref Tutorial5Use
+		- \ref Tutorial5Make
 */
 
 /*!
@@ -221,5 +224,80 @@
 	That is assuming you have a loaded \link vc::vdFrame vdFrame \endlink called frame.
 
 	<hr>
-	Navigation: \ref Tutorial4gtkmm "Back (Integration - gtkmm)" - \ref main "Home" - \ref Tutorial4 "Up (Integration)"
+	Navigation: \ref Tutorial4gtkmm "Back (Integration - gtkmm)" - \ref main "Home" - \ref Tutorial5 "Next (Effects)"
+*/
+
+/*!
+	\page Tutorial5 Effects
+	libvcvideo also provides a basic effects framework, accessed through the
+	\link vc::effects effects \endlink object.
+
+	- \subpage Tutorial5Use
+	- \subpage Tutorial5Make
+
+	<hr>
+	Navigation: \ref Tutorial4magick "Back (Integration - libmagick++)" - \ref main "Home" - \ref Tutorial5Use "Next (Effects - Using Effects)"
+*/
+
+/*!
+	\page Tutorial5Use Effects - Using Effects
+
+	To use the effects framework requires three basic steps.
+
+	First you need to create an \link vc::effects effects \endlink object.  This is
+	a singleton class, so you'll need to use a pointer and the \link vc::effects::instance effects::instance \endlink
+	method.
+
+	Next you need to load the plugins you may want to use, to do this specify the
+	path to the plugins in the \link vc::effects::registerEffect effects::registerEffect \endlink
+	method.
+
+	Once sucessfully registered you may use an effect by passing the active frame
+	to the \link vc::effects::applyEffect effects::applyEffect \endlink method.
+
+	Assuming that you have a valid \link vc::vdFrame vdFrame \endlink called 'frame'
+	and you know that the "effects/mirror.so" plugin provides an effect called "Mirror"
+	you can just do as follows.
+
+	\code
+    1 vc::effects * vcfx = vc::effects::instance();
+    2 vcfx->registerEffect("effects/mirror.so");
+    3 vcfx->applyEffect("Mirror",frame);
+	\endcode
+
+	That's a lot of assuming however, so there are a number of useful functions to
+	help you figure out what effects exist and what they do. For that please
+	look into \link vc::effects::getEffectNames effects::getEffectNames \endlink,
+	\link vc::effects::getEffectArguments effects::getEffectArguments \endlink and
+	others.
+
+	\todo Explain arguments.
+
+	<hr>
+	Navigation: \ref Tutorial5 "Back (Effects)" - \ref main "Home" - \ref Tutorial5Make "Next (Effects - Creating Plugins)"
+*/
+
+/*!
+	\page Tutorial5Make Effects - Creating Plugins
+
+	All plugins must have the following functions defined and implemented.
+
+	\code
+	std::string effect_name();
+	std::string effect_description();
+	std::string effect_author();
+	std::string effect_website();
+	std::string effect_contact();
+	double effect_version();
+	bool effect_init (vc::vdFrame &);
+	bool effect_deinit();
+	void effect_apply (vc::vdFrame &, std::vector<effectArgument>);
+	std::vector<effectArgument> effect_arguments();
+	\endcode
+
+	Plugins are fairly easy to write, just refer to some of the examples in the
+	"effect/effects/" directory.
+
+	<hr>
+	Navigation: \ref Tutorial5Use "Back (Effects - Using Effects)" - \ref main "Home" - \ref Tutorial5 "Up (Effects)"
 */
