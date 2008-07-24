@@ -32,7 +32,7 @@ using std::string;
 using std::vector;
 using std::pair;
 
-#include "vdFrame.h"
+#include "lib/vdFrame.h"
 
 namespace vc {
 

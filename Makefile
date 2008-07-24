@@ -67,7 +67,7 @@ TRGT_BIN_GTK = lib/videoDevice.o bin/gtkTest.o
 gtkTest: $(TRGT_BIN_GTK)
 	$(COMPILER) $(GTKLFLAGS) $(TRGT_BIN_GTK) -o bin/$@
 
-TRGT_BIN_EFFECT = bin/effectInformation.o effect/effects.o
+TRGT_BIN_EFFECT = bin/effectInformation.o lib/effects.o
 effectInformation: $(TRGT_BIN_EFFECT)
 	$(COMPILER) $(LFLAGS) $(GMODULEFLAGS) $(TRGT_BIN_EFFECT) -o bin/$@
 
@@ -83,9 +83,9 @@ clean:
 	@rm -f bin/gtkTest
 	@rm -f bin/effectInformation
 	@rm -rf docs/html/*
-	@rm -f effect/*.o
-	@rm -f effect/effects/*.o
-	@rm -f effect/effects/*.so
+	@rm -f *.o
+	@rm -f effects/*.o
+	@rm -f effects/*.so
 
 # Object targets
 .SUFFIXES : .cpp .o .h
@@ -97,8 +97,7 @@ depend:
 	@echo '# Do not change this file unless you know what you are doing. Use make gendeps instead.' > dependency.mk
 	g++ -I. -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
 	g++ -I. -MM bin/*.cpp | sed 's/^\([a-zA-Z]\)/\nbin\/\1/' >> dependency.mk
-	g++ -I. -MM effect/*.cpp | sed 's/^\([a-zA-Z]\)/\neffect\/\1/' >> dependency.mk
-	g++ -I. -MM effect/effects/*.cpp | sed 's/^\([a-zA-Z]\)/\neffect\/effects\/\1/' >> dependency.mk
+	g++ -I. -MM effects/*.cpp | sed 's/^\([a-zA-Z]\)/\neffects\/\1/' >> dependency.mk
 
 include dependency.mk
 
@@ -110,24 +109,23 @@ bin/gtkTest.o: $(TRGT_BIN_GTKTEST_O)
 bin/vcvTest.o: bin/vcvTest.cpp lib/videoDevice.h
 	$(COMPILER) $(MAGICKCFLAGS) -c $< -o $@
 
-bin/effectInformation.o: bin/effectInformation.cpp effect/effects.h
+bin/effectInformation.o: bin/effectInformation.cpp lib/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
 # Plugins
-plugins: effect/effects/example.so effect/effects/testPattern.so effect/effects/mirror.so \
-effect/effects/vmirror.so
+plugins: effects/example.so effects/testPattern.so effects/mirror.so effects/vmirror.so
 
-effect/effects.o: effect/effects.cpp effect/effects.h
+lib/effects.o: lib/effects.cpp lib/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
-effect/effects/example.so: effect/effects/example.o
+effects/example.so: effects/example.o
 	$(CC) $(EFFECTFLAGS) $< -o $@
 
-effect/effects/testPattern.so: effect/effects/testPattern.o
+effects/testPattern.so: effects/testPattern.o
 	$(CC) $(EFFECTFLAGS) $< -o $@
 
-effect/effects/mirror.so: effect/effects/mirror.o
+effects/mirror.so: effects/mirror.o
 	$(CC) $(EFFECTFLAGS) $< -o $@
 
-effect/effects/vmirror.so: effect/effects/vmirror.o
+effects/vmirror.so: effects/vmirror.o
 	$(CC) $(EFFECTFLAGS) $< -o $@

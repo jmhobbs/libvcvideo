@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "lib/vdFrame.h"
-#include "effect/effects/effectArgument.h"
+#include "lib/effectArgument.h"
 
 extern "C" std::string effect_name () { return "Test Pattern"; }
 extern "C" std::string effect_description () { return "This is an example libvcvideo plugin. It replaces the frame with a test pattern."; }
@@ -13,7 +13,7 @@ extern "C" double effect_version () { return 1.0; }
 
 extern "C" bool effect_init (vc::vdFrame & initFrame) { /* Nothing to init. */ return true; }
 extern "C" bool effect_deinit () { /* Nothing to deinit. */ return true; }
-extern "C" void effect_apply (vc::vdFrame & frame, std::vector<effectArgument> args) {
+extern "C" void effect_apply (vc::vdFrame & frame, std::vector<vc::effectArgument> args) {
 	// Utterly inefficient! Yay!
 	for(unsigned int j = 0; j < frame.bufferSize/3; j += 3) {
 		frame.buffer[j] = 0;
@@ -32,7 +32,7 @@ extern "C" void effect_apply (vc::vdFrame & frame, std::vector<effectArgument> a
 	}
 }
 
-extern "C" std::vector<effectArgument> effect_arguments () {
-	std::vector<effectArgument> ret;
+extern "C" std::vector<vc::effectArgument> effect_arguments () {
+	std::vector<vc::effectArgument> ret;
 	return ret;
 }

@@ -219,10 +219,8 @@ namespace vc {
 	*/
 	void effects::applyEffect (std::string _name, vc::vdFrame & _frame) {
 		std::vector<effectArgument> temp;
-		try
-			applyEffect(_name, _frame, temp);
-		catch (std::string s)
-			throw s;
+		try { applyEffect(_name, _frame, temp); }
+		catch (std::string s) { throw s; }
 	}
 
 	/*!

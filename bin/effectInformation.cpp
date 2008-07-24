@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "effect/effects.h"
+#include "lib/effects.h"
 
 int main (int argc, char ** argv) {
 
@@ -32,8 +32,8 @@ int main (int argc, char ** argv) {
 		std::cout << "Website     : " << eff->getEffectWebsite(*it) << std::endl;
 		std::cout << "Description : " << eff->getEffectDescription(*it) << std::endl;
 		std::cout << "Arguments   : " << std::endl;
-		std::vector<effectArgument> args = eff->getArguments(*it);
-		for(std::vector<effectArgument>::iterator itt = args.begin(); itt != args.end(); ++itt) {
+		std::vector<vc::effectArgument> args = eff->getArguments(*it);
+		for(std::vector<vc::effectArgument>::iterator itt = args.begin(); itt != args.end(); ++itt) {
 			std::cout << "            : Name        : " << itt->name << std::endl;
 			std::cout << "            : Description : " << itt->description << std::endl;
 		}

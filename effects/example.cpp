@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "lib/vdFrame.h"
-#include "effect/effects/effectArgument.h"
+#include "lib/effectArgument.h"
 
 /*
 	These are all informational except the name. The name must be unique from all
@@ -29,13 +29,13 @@ extern "C" bool effect_deinit () { return true; }
 	This should be parsed as each effectArgument is a struct with a name, type, and
 	value.
 */
-extern "C" void effect_apply (vc::vdFrame & applyTo, std::vector<effectArgument> args) {}
+extern "C" void effect_apply (vc::vdFrame & applyTo, std::vector<vc::effectArgument> args) {}
 /*
 	Each plugin is queried for it's arguments which are sent back as a vector of effectArgument structs.
 	The important fields here are name, description and type.
 */
-extern "C" std::vector<effectArgument> effect_arguments () {
-	std::vector<effectArgument> ret;
-	ret.push_back(effectArgument("Example Argument","Doesn't do anything.",BOOLEAN));
+extern "C" std::vector<vc::effectArgument> effect_arguments () {
+	std::vector<vc::effectArgument> ret;
+	ret.push_back(vc::effectArgument("Example Argument","Doesn't do anything.",vc::BOOLEAN));
 	return ret;
 }

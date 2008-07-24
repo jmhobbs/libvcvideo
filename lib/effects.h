@@ -8,7 +8,7 @@
 #include <gmodule.h>
 
 #include "lib/vdFrame.h"
-#include "effect/effects/effectArgument.h"
+#include "lib/effectArgument.h"
 
 namespace vc {
 
