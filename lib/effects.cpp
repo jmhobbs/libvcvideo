@@ -1,5 +1,11 @@
 #include "effects.h"
 
+#include <stddef.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <string.h>
+
 namespace vc {
 
 	effects * effects::pinstance = NULL;
@@ -19,9 +25,40 @@ namespace vc {
 	/*!
 		This method searches the default plugin path for effects and loads them.
 
-		\todo Implement
+		\todo Recursive search.
+		\todo Better test of file?
+
+		\return The number of effects added to the registry.
 	*/
-	void effects::populateRegistry () {}
+	int effects::populateRegistry () {
+		DIR *dp;
+		struct dirent *ep;
+		int effectsAdded = 0;
+		#define EFFECT_INSTALL_PATH "/usr/share/libvcvideo/effects/"
+		dp = opendir (EFFECT_INSTALL_PATH); //! \todo Real install path!
+		if(dp != NULL) {
+			ep = readdir(dp);
+			int len;
+			while(ep != NULL) {
+				len = strlen(ep->d_name);
+				if('o' == ep->d_name[len-1] && 's' == ep->d_name[len-2]) {
+					try{
+						registerEffect(std::string(EFFECT_INSTALL_PATH)+ep->d_name);
+						++effectsAdded;
+					}
+					catch (std::string s) {
+						//! \todo Do anything with that error?
+					}
+				}
+				ep = readdir(dp);
+			}
+			(void) closedir (dp);
+		}
+		else
+			throw std::string ("Could not open EFFECT_INSTALL_PATH directory.");
+
+		return effectsAdded;
+	}
 
 	/*!
 		This method attempts to register a given effect.

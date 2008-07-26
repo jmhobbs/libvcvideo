@@ -42,7 +42,7 @@ namespace vc {
 		public:
 			static effects * instance ();
 
-			void populateRegistry ();
+			int populateRegistry ();
 			void registerEffect (std::string);
 
 			std::vector<std::string> getEffectNames ();
