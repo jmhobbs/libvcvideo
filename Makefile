@@ -56,6 +56,20 @@ EFFECTFLAGS = -shared -lc
 GTKCFLAGS = `pkg-config gtkmm-2.4 --cflags`
 GTKLFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
 
+# Primary target for making an installation
+release: dynamicLib plugins
+
+install: release
+	cp lib/libvcvideo.so.1.0.1 /usr/lib/ && \
+	mkdir -p /usr/include/libvcvideo && \
+	cp lib/videoDevice.h /usr/include/libvcvideo/ && \
+	cp lib/effects.h /usr/include/libvcvideo/ && \
+	mkdir -p /usr/share/libvcvideo/effects/ && \
+	cp effects/*.so /usr/share/libvcvideo/effects/ && \
+	ldconfig -n /usr/lib/ && \
+	rm -f /usr/lib/libvcvideo.so && \
+	ln -s /usr/lib/libvcvideo.so.1 /usr/lib/libvcvideo.so
+
 # Targets
 bins: vcvTest gtkTest effectInformation
 
@@ -71,21 +85,36 @@ TRGT_BIN_EFFECT = bin/effectInformation.o lib/effects.o
 effectInformation: $(TRGT_BIN_EFFECT)
 	$(COMPILER) $(LFLAGS) $(GMODULEFLAGS) $(TRGT_BIN_EFFECT) -o bin/$@
 
+# Create a static archive
+staticLib: lib/videoDevice.o lib/effects.o
+	ar -cvr lib/libvcvideo.a lib/videoDevice.o lib/effects.o
+
+# Create a dynamic library
+dynamicLib: lib/videoDevice.o lib/effects.o
+	$(COMPILER) $(LFLAGS) -shared -Wl,-soname,libvcvideo.so.1 -lc -o lib/libvcvideo.so.1.0.1 lib/videoDevice.o lib/effects.o
+
 .PHONY: docs clean
 
+# Genetate documentation
 docs:
-	cd docs && doxygen config.doxy && echo ".fragment { overflow: auto; }" >> html/doxygen.css #&& cp theme/ftv2folderclosed.png html/
+	cd docs && doxygen config.doxy && echo ".fragment { overflow: auto; }" >> html/doxygen.css
 
+# Clean up object files
 clean:
 	@rm -f lib/*.o
 	@rm -f bin/*.o
+	@rm -f *.o
+	@rm -f effects/*.o
+
+# Clean up _everything_
+spotless: clean
 	@rm -f bin/vcvTest
 	@rm -f bin/gtkTest
 	@rm -f bin/effectInformation
 	@rm -rf docs/html/*
-	@rm -f *.o
-	@rm -f effects/*.o
 	@rm -f effects/*.so
+	@rm -f lib/*.so
+	@rm -f lib/*.a
 
 # Object targets
 .SUFFIXES : .cpp .o .h
@@ -101,7 +130,7 @@ depend:
 
 include dependency.mk
 
-# Special cases...
+# Special case dependencies
 TRGT_BIN_GTKTEST_O = bin/gtkTest.cpp lib/videoDevice.h
 bin/gtkTest.o: $(TRGT_BIN_GTKTEST_O)
 	$(COMPILER) $(GTKCFLAGS) -c $< -o $@
@@ -112,7 +141,7 @@ bin/vcvTest.o: bin/vcvTest.cpp lib/videoDevice.h
 bin/effectInformation.o: bin/effectInformation.cpp lib/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
-# Plugins
+# Included plugins
 plugins: effects/example.so effects/testPattern.so effects/mirror.so effects/vmirror.so
 
 lib/effects.o: lib/effects.cpp lib/effects.h
