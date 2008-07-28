@@ -1,3 +1,16 @@
 TODO
 
-Replace all exception throws of string to something out.
+Move to a better build system. autotools?
+Remove the sigc++ dependency?
+
+V4L
+	Memory map capability
+	Tuner devices
+	Overlay devices
+
+V4L2
+	Basic support
+	Overlay devices
+
+Windows
+	DirectShow devices

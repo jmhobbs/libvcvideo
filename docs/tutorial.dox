@@ -18,6 +18,7 @@
 	Please see the following pages for more information.
 
 	- \subpage Tutorial2
+	- \subpage Tutorial6
 	- \subpage Tutorial3
 	- \subpage Tutorial4
 	  - \ref Tutorial4gtkmm
@@ -41,7 +42,7 @@
     4   #include <string>
     5   using std::string;
     6
-    7   #include "lib/videoDevice.h"
+    7   #include <libvcvideo/videoDevice.h>
     8
     9   int main (int argc, char ** argv) {
    10     vc::videoDevice device ("/dev/video0");
@@ -102,7 +103,35 @@
 	user, or do whatever with it that you please.
 
 	<hr>
-	Navigation: \ref main "Home" - \ref Tutorial3 "Next (Other Methods)"
+	Navigation: \ref main "Home" - \ref Tutorial6 "Next (Compilation)"
+*/
+
+/*!
+	\page Tutorial6 Compilation
+	Compiling can be a bit hairy right now as there is no pkg-config support yet.
+
+	You need to use the following guide for what flags to pass to g++.
+
+	All compilations need these flags,
+
+	Compile Flags:  -I/usr/include/libvcvideo
+	Linker Flags:   -lvcvideo `pkg-config gmodule-2.0 --libs`
+
+	If you are using effects, you need these additional flags.
+
+	Compile Flags:  `pkg-config gmodule-2.0 --cflags`
+
+	Lastly, if your version was compiled with libsigc++ you need this flag:
+
+	Compile Flags:  -DSIGCPP
+
+	So an application needing effects and built with libsigc++ needs...
+
+	Compile Flags:  -I/usr/include/libvcvideo `pkg-config gmodule-2.0 --cflags` -DSIGCPP
+	Linker Flags:   -lvcvideo `pkg-config gmodule-2.0 --libs`
+
+	<hr>
+	Navigation: \ref Tutorial2 "Back (The Basics)" - \ref main "Home" - \ref Tutorial3 "Next (Other Methods)"
 */
 
 /*!
@@ -173,7 +202,7 @@
 	method but it can be very handy.
 
 	<hr>
-	Navigation: \ref Tutorial2 "Back (The Basics)" - \ref main "Home" - \ref Tutorial4 "Next (Integration)"
+	Navigation: \ref Tutorial6 "Back (Compilation)" - \ref main "Home" - \ref Tutorial4 "Next (Integration)"
 */
 
 /*!

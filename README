@@ -6,14 +6,33 @@ USB webcams, hopefully with capabilities expanding over time to include tuner
 devices as well.
 
 Currently the library is Linux compatible only, and only specific V4L1 devices.
-Currently this is NOT a shared library, please link manually or wait a few more revisions.
 
 libvcvideo is released under the GNU Public License v3.
 
 -------------------------------[DEPENDENCIES]-----------------------------------
 
 A modern kernel with V4L.
-A video device.
+A compatible video device.
+glib (for effects)
+libsigc++ (optional)
+libmagick++ (optional, for example programs)
+gtkmm (optional, for example programs)
+
+-----------------------------------[USING]--------------------------------------
+To compile a program, use the following flags:
+
+Compile Flags:  -I/usr/include/libvcvideo
+Linker Flags:   -lvcvideo `pkg-config gmodule-2.0 --libs`
+
+If using effects, you need these in additional flags.
+
+Compile Flags:  `pkg-config gmodule-2.0 --cflags`
+
+Lastly, if your version was compiled with libsigc++ you need this flag:
+
+Compile Flags:  -DSIGCPP
+
+A pkg-config will come soon, I swear.
 
 -----------------------------------[LINKS]--------------------------------------
 

@@ -18,13 +18,13 @@
 # along with libvcvideo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Set capabilities...
-ifeq ($(SIGCPP),NO)
-	SIGCPPCFLAGS =
-	SIGCPPLFLAGS =
-else
+# ifeq ($(SIGCPP),NO)
+# 	SIGCPPCFLAGS =
+# 	SIGCPPLFLAGS =
+# else
 	SIGCPPCFLAGS = -DSIGCPP `pkg-config --cflags sigc++-2.0`
 	SIGCPPLFLAGS = `pkg-config --cflags --libs sigc++-2.0`
-endif
+# endif
 
 ifeq ($(VCDEBUG),YES)
 	DEBUGCFLAGS = -DVCVIDEO_DEBUG
@@ -43,7 +43,7 @@ endif
 # Compiler setup
 CC = g++
 CFLAGS = -Wall -g -fPIC -I. $(DEBUGCFLAGS) $(SIGCPPCFLAGS)
-LFLAGS = -Wall $(SIGCPPLFLAGS) $(MAGICKLFLAGS)
+LFLAGS = -Wall $(SIGCPPLFLAGS)
 
 COMPILER = $(CC) $(CFLAGS)
 
@@ -64,14 +64,24 @@ install: release
 	mkdir -p /usr/include/libvcvideo && \
 	cp lib/videoDevice.h /usr/include/libvcvideo/ && \
 	cp lib/effects.h /usr/include/libvcvideo/ && \
+	cp lib/vdFrame.h /usr/include/libvcvideo/ && \
 	mkdir -p /usr/share/libvcvideo/effects/ && \
 	cp effects/*.so /usr/share/libvcvideo/effects/ && \
 	ldconfig -n /usr/lib/ && \
 	rm -f /usr/lib/libvcvideo.so && \
 	ln -s /usr/lib/libvcvideo.so.1 /usr/lib/libvcvideo.so
 
-# Targets
+# Other targets
 bins: vcvTest gtkTest effectInformation
+
+# Dynamic linked test
+bin/dynTest.o: bin/dynTest.cpp
+	$(COMPILER) $(GMODULECFLAGS) -I/usr/include/libvcvideo -c $< -o $@
+
+TRGT_BIN_DYN = lib/videoDevice.o bin/dynTest.o
+dynTest: $(TRGT_BIN_DYN)
+	$(COMPILER) $(LFLAGS) $(GMODULEFLAGS) -lvcvideo $(TRGT_BIN_DYN) -o bin/$@
+# End dynamic linked test
 
 TRGT_BIN_PLAIN = lib/videoDevice.o bin/vcvTest.o
 vcvTest: $(TRGT_BIN_PLAIN)
@@ -110,11 +120,13 @@ clean:
 spotless: clean
 	@rm -f bin/vcvTest
 	@rm -f bin/gtkTest
+	@rm -f bin/dynTest
 	@rm -f bin/effectInformation
 	@rm -rf docs/html/*
 	@rm -f effects/*.so
 	@rm -f lib/*.so
 	@rm -f lib/*.a
+	@rm -f lib/libvcvideo.so.1.0.1
 
 # Object targets
 .SUFFIXES : .cpp .o .h
@@ -123,7 +135,7 @@ spotless: clean
 	$(COMPILER) -c $< -o $@
 
 depend:
-	@echo '# Do not change this file unless you know what you are doing. Use make gendeps instead.' > dependency.mk
+	@echo '# Do not change this file unless you know what you are doing. Use make depend instead.' > dependency.mk
 	g++ -I. -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
 	g++ -I. -MM bin/*.cpp | sed 's/^\([a-zA-Z]\)/\nbin\/\1/' >> dependency.mk
 	g++ -I. -MM effects/*.cpp | sed 's/^\([a-zA-Z]\)/\neffects\/\1/' >> dependency.mk

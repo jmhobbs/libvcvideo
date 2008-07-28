@@ -1,21 +1,25 @@
-Currently this is NOT a shared library, please link manually or wait a few more revisions.
+libvcvideo does not use autotools yet, so building is a bit different.
 
-You can build some test programs with:
-make testPlain
-make testGtk
+You can build and install the shared library and it's plugins with a simple "make install" as root.
 
-Or you can just build the library with:
-make lib/videoDevice.o
+Alternately you can build a static version with "make staticLib"
 
-If you don't have libsigc++ installed, build without it:
-SIGCPP='NO' make lib/videoDevice.o
+There are some example binaries in the "bins" directory, build them with
+"make bins" or individually by name (without the .cpp).  Please be aware that
+these are all statically linked. The sole exception is "make dynTest" which will
+try to build a very simple dynamically linked test.
 
-If you don't have magick++ installed, your "testPlain" build will fail. Build with:
-MAGICK='NO' make testPlain
+-------[BUILD OPTIONS]-------
+If you don't have libsigc++ installed, or don't want to use it, build without it
+by appending your make commands with " SIGCPP='NO' ", like so:
 
-If you want debug output (goes to cerr) build the library with:
-VCDEBUG='YES' make lib/videoDevice.o
+SIGCPP='NO' make staticLib
 
-If you have doxygen and want to make your own copy of the API documentation, be in the
-root of the project and run:
-make docs
+If you don't have magick++ installed, your binaries vill complain or fail. Build
+with " MAGICK='NO' " to skip it.
+
+If you want debug output (goes to cerr) build with " VCDEBUG='YES' "
+
+-------[OTHER TARGETS]-------
+If you have doxygen and want to make your own copy of the API documentation, go
+to the root of the project and run "make docs"
