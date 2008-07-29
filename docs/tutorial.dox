@@ -143,8 +143,8 @@
 	returns a std::vector of std::strings that are likely video devices on your system.  You can
 	then iterate over the devices to try them out and see if they work with libvcvideo.
 
-	Another static method is the vc::videoDevice::getIntegerControlString method. This will
-	get the appropriate std::string name for an integer control, which are discussed
+	Another static method is the vc::videoDevice::getControlString method. This will
+	get the appropriate std::string name for a control, which are discussed
 	in the Normal Methods section below.
 
 	<hr>
@@ -152,22 +152,25 @@
 	\section Normal Normal Methods
 	These methods can only be called after device initialization is done.
 
-	\subsection integerControls Integer Controls
-	Integer Controls are any aspect of the device that can be controlled by an
-	integer value.  The currently supported controls are listed in the vc::vdIntegerControl
-	enumeration.
+	\subsection Controls Controls
+	Controls are any aspect of the device that can be controlled in real time, such
+	as brightness or exposure. The currently supported controls are listed in the
+	vc::vdIntegerControl and vc::vdDoubleControl enumerations.
 
-	The \link vc::videoDevice::getValidIntegerControls getValidIntegerControls \endlink will return a vector of integer controls
-	that you can use on your device. You can then use \link vc::videoDevice::getIntegerControlMinimum getIntegerControlMinimum \endlink
-	and \link vc::videoDevice::getIntegerControlMaximum getIntegerControlMaximum \endlink to find the range of the control, and
-	\link vc::videoDevice::getIntegerControlStep getIntegerControlStep \endlink to find the effective step value for it.
+	The \link vc::videoDevice::getSupportedIntegerControls getSupportedIntegerControls \endlink
+	and \link vc::videoDevice::getSupportedDoubleControls getSupportedDoubleControls \endlink
+	will return a vector of that type of control, which you can use on your device.
+
+	You can then use \link vc::videoDevice::getControlMinimum getControlMinimum \endlink
+	and \link vc::videoDevice::getControlMaximum getControlMaximum \endlink to find the range of the control, and
+	\link vc::videoDevice::getControlStep getControlStep \endlink to find the effective step value for it.
 
 	\code
     1   try {
     2     cout << "Brightness (min/max/cur): "
-    3          << device.getIntegerControlMinimum(vc::BRIGHTNESS) << "/"
-    4          << device.getIntegerControlMaximum(vc::BRIGHTNESS) << "/"
-    5          << device.getIntegerControlValue(vc::BRIGHTNESS) << endl;
+    3          << device.getControlMinimum(vc::BRIGHTNESS) << "/"
+    4          << device.getControlMaximum(vc::BRIGHTNESS) << "/"
+    5          << device.getControlValue(vc::BRIGHTNESS) << endl;
     6   }
     7   catch(string s) {
     8     cout << "Brightness Information Failed: " << s << endl;
@@ -176,13 +179,13 @@
 	\endcode
 
 	With all this information in hand you can then get and set the control through the
-	\link vc::videoDevice::getIntegerControlValue getIntegerControlValue \endlink and
-	\link vc::videoDevice::setIntegerControlValue setIntegerControlValue \endlink methods.
+	\link vc::videoDevice::getControlValue getControlValue \endlink and
+	\link vc::videoDevice::setControlValue setControlValue \endlink methods.
 
 	\code
     1   try {
-    2     device.setIntegerControlValue(vc::BRIGHTNESS,5000);
-    3     cout << device.getIntegerControlValue(vc::BRIGHTNESS) << endl;
+    2     device.setControlValue(vc::BRIGHTNESS,5000);
+    3     cout << device.getControlValue(vc::BRIGHTNESS) << endl;
     4   }
     5   catch(string s) {
     6     cout << "Brightness Change Failed: " << s << endl;

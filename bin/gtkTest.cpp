@@ -74,55 +74,55 @@ class Viewer : public Gtk::Window {
 
 			vbox.pack_start(screen,false,false,0);
 
-			if(vd.getIntegerControlUsed(vc::BRIGHTNESS)) {
+			if(vd.getControlSupported(vc::BRIGHTNESS)) {
 				lblBrightness.set_text("Brightness");
 				vbox.pack_start(lblBrightness,false,false,0);
 				sbrightness.set_range(
-					vd.getIntegerControlMinimum(vc::BRIGHTNESS),
-					vd.getIntegerControlMaximum(vc::BRIGHTNESS)
+					vd.getControlMinimum(vc::BRIGHTNESS),
+					vd.getControlMaximum(vc::BRIGHTNESS)
 				);
 				sbrightness.set_digits(0);
-				sbrightness.set_value(vd.getIntegerControlValue(vc::BRIGHTNESS));
+				sbrightness.set_value(vd.getControlValue(vc::BRIGHTNESS));
 				sbrightness.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeBrightness));
 				vbox.pack_start(sbrightness,false,false,0);
 			}
 
-			if(vd.getIntegerControlUsed(vc::SATURATION)) {
+			if(vd.getControlSupported(vc::SATURATION)) {
 				lblSaturation.set_text("Saturation");
 				vbox.pack_start(lblSaturation,false,false,0);
 				ssaturation.set_range(
-					vd.getIntegerControlMinimum(vc::SATURATION),
-					vd.getIntegerControlMaximum(vc::SATURATION)
+					vd.getControlMinimum(vc::SATURATION),
+					vd.getControlMaximum(vc::SATURATION)
 				);
 				ssaturation.set_digits(0);
-				ssaturation.set_value(vd.getIntegerControlValue(vc::SATURATION));
+				ssaturation.set_value(vd.getControlValue(vc::SATURATION));
 				ssaturation.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeSaturation));
 				vbox.pack_start(ssaturation,false,false,0);
 			}
 
-			if(vd.getIntegerControlUsed(vc::CONTRAST)) {
+			if(vd.getControlSupported(vc::CONTRAST)) {
 				lblContrast.set_text("Contrast");
 				vbox.pack_start(lblContrast,false,false,0);
 				scontrast.set_range(
-					vd.getIntegerControlMinimum(vc::CONTRAST),
-					vd.getIntegerControlMaximum(vc::CONTRAST)
+					vd.getControlMinimum(vc::CONTRAST),
+					vd.getControlMaximum(vc::CONTRAST)
 				);
 				scontrast.set_digits(0);
-				scontrast.set_value(vd.getIntegerControlValue(vc::CONTRAST));
+				scontrast.set_value(vd.getControlValue(vc::CONTRAST));
 				//scontrast.set_update_policy(Gtk::UPDATE_DELAYED);
 				scontrast.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeContrast));
 				vbox.pack_start(scontrast,false,false,0);
 			}
 
-			if(vd.getIntegerControlUsed(vc::HUE)) {
+			if(vd.getControlSupported(vc::HUE)) {
 				lblHue.set_text("Hue");
 				vbox.pack_start(lblHue,false,false,0);
 				shue.set_range(
-					vd.getIntegerControlMinimum(vc::HUE),
-					vd.getIntegerControlMaximum(vc::HUE)
+					vd.getControlMinimum(vc::HUE),
+					vd.getControlMaximum(vc::HUE)
 				);
 				shue.set_digits(0);
-				shue.set_value(vd.getIntegerControlValue(vc::HUE));
+				shue.set_value(vd.getControlValue(vc::HUE));
 				shue.signal_change_value().connect(sigc::mem_fun(*this,&Viewer::changeHue));
 				vbox.pack_start(shue,false,false,0);
 			}
@@ -169,7 +169,7 @@ class Viewer : public Gtk::Window {
 		void stopCamera () { running = false; }
 
 		bool changeBrightness(Gtk::ScrollType type, double value) {
-			try { vd.setIntegerControlValue(vc::BRIGHTNESS,value); }
+			try { vd.setControlValue(vc::BRIGHTNESS,value); }
 			catch(string s) {
 				std::cerr << "Can't change brightness: " << s << std::endl;
 				return false;
@@ -178,7 +178,7 @@ class Viewer : public Gtk::Window {
 		}
 
 		bool changeContrast(Gtk::ScrollType type, double value) {
-			try { vd.setIntegerControlValue(vc::CONTRAST,value); }
+			try { vd.setControlValue(vc::CONTRAST,value); }
 			catch(string s) {
 				std::cerr << "Can't change contrast: " << s << std::endl;
 				return false;
@@ -187,7 +187,7 @@ class Viewer : public Gtk::Window {
 		}
 
 		bool changeSaturation(Gtk::ScrollType type, double value) {
-			try { vd.setIntegerControlValue(vc::SATURATION,value); }
+			try { vd.setControlValue(vc::SATURATION,value); }
 			catch(string s) {
 				std::cerr << "Can't change saturation: " << s << std::endl;
 				return false;
@@ -196,7 +196,7 @@ class Viewer : public Gtk::Window {
 		}
 
 		bool changeHue(Gtk::ScrollType type, double value) {
-			try { vd.setIntegerControlValue(vc::HUE,value); }
+			try { vd.setControlValue(vc::HUE,value); }
 			catch(string s) {
 				std::cerr << "Can't change hue: " << s << std::endl;
 				return false;

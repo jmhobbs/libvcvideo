@@ -85,8 +85,8 @@ int main (int argc, char ** argv) {
 	cout << "Card name: " << test.getCardName() << endl;
 
 	try {
-		cout << "Brightness (min/max/cur): " << test.getIntegerControlMinimum(BRIGHTNESS) << "/"
-				 << test.getIntegerControlMaximum(BRIGHTNESS) << "/" << test.getIntegerControlValue(BRIGHTNESS) << endl;
+		cout << "Brightness (min/max/cur): " << test.getControlMinimum(BRIGHTNESS) << "/"
+				 << test.getControlMaximum(BRIGHTNESS) << "/" << test.getControlValue(BRIGHTNESS) << endl;
 	}
 	catch(string s) {
 		cout << "Brightness Information Failed: " << s << endl;

@@ -411,10 +411,10 @@ namespace vc {
 		\throws string If device not started.
 		\throws string If an invalid control is specified.
 
-		\param controlType The type of integer control to check.
+		\param controlType The type of control to check.
 		\return True if used.
 	*/
-	bool videoDevice::getIntegerControlUsed(const vdIntegerControl controlType) {
+	bool videoDevice::getControlSupported(const vdIntegerControl controlType) {
 		if(!live)
 			throw string("Device is not initialized.");
 
@@ -452,17 +452,17 @@ namespace vc {
 	}
 
 	/*!
-		Get the current setting of an integer control, if possible.
+		Get the current setting of a control, if possible.
 
 		\throws string If device not started.
 		\throws string If an invalid control is specified.
 		\throws string If that control is not used on this device.
 		\throws string If it can't retrieve the value.
 
-		\param controlType The type of integer control to get.
+		\param controlType The type of control to get.
 		\return The integer control value.
 	*/
-	int videoDevice::getIntegerControlValue (const vdIntegerControl controlType) {
+	int videoDevice::getControlValue (const vdIntegerControl controlType) {
 		if(!live)
 			throw string("Device is not initialized.");
 
@@ -509,7 +509,7 @@ namespace vc {
 				case SATURATION:
 					throw string("V4L1 does not support saturation.");
 				case HUE:
-					if(!getIntegerControlUsed(HUE))
+					if(!getControlSupported(HUE))
 						throw string("Hue control not used on this device.");
 					return v1_controls.hue;
 				default:
@@ -520,17 +520,17 @@ namespace vc {
 	}
 
 	/*!
-		Get the minimum setting of an integer control, if possible.
+		Get the minimum setting of a control, if possible.
 
 		\throws string If device not started.
 		\throws string If an invalid control is specified.
 		\throws string If that control is not used on this device.
 		\throws string If it can't retrieve the value.
 
-		\param controlType The type of integer control to get.
+		\param controlType The type of control to get.
 		\return The minimum value.
 	*/
-	int videoDevice::getIntegerControlMinimum (const vdIntegerControl controlType) {
+	int videoDevice::getControlMinimum (const vdIntegerControl controlType) {
 		if(!live)
 			throw string("Device is not initialized.");
 
@@ -562,7 +562,7 @@ namespace vc {
 				case SATURATION:
 					throw string("V4L1 does not support saturation.");
 				case HUE:
-					if(!getIntegerControlUsed(HUE))
+					if(!getControlSupported(HUE))
 						throw string("Hue control not used on this device.");
 					return 0;
 				default:
@@ -573,17 +573,17 @@ namespace vc {
 	}
 
 	/*!
-		Get the maximum setting of an integer control, if possible.
+		Get the maximum setting of a control, if possible.
 
 		\throws string If device not started.
 		\throws string If an invalid control is specified.
 		\throws string If that control is not used on this device.
 		\throws string If it can't retrieve the value.
 
-		\param controlType The type of integer control to get.
+		\param controlType The type of control to get.
 		\return The maximum value.
 	*/
-	int videoDevice::getIntegerControlMaximum (const vdIntegerControl controlType) {
+	int videoDevice::getControlMaximum (const vdIntegerControl controlType) {
 		if(!live)
 			throw string("Device is not initialized.");
 
@@ -615,7 +615,7 @@ namespace vc {
 				case SATURATION:
 					throw string("V4L1 does not support saturation.");
 				case HUE:
-					if(!getIntegerControlUsed(HUE))
+					if(!getControlSupported(HUE))
 						throw string("Hue control not used on this device.");
 					return 65535;
 				default:
@@ -626,17 +626,17 @@ namespace vc {
 	}
 
 	/*!
-		Get the minimum effective interval for an integer control, if possible.
+		Get the minimum effective interval for a control, if possible.
 
 		\throws string If device not started.
 		\throws string If an invalid control is specified.
 		\throws string If that control is not used on this device.
 		\throws string If it can't retrieve the value.
 
-		\param controlType The type of integer control to get.
-		\return The minimum effective interval for the brightness value.
+		\param controlType The type of control to get.
+		\return The minimum effective interval for the control value.
 	*/
-	int videoDevice::getIntegerControlStep (const vdIntegerControl controlType) {
+	int videoDevice::getControlStep (const vdIntegerControl controlType) {
 		if(!live)
 			throw string("Device is not initialized.");
 
@@ -664,17 +664,17 @@ namespace vc {
 	}
 
 	/*!
-		Sets an integer control on the device, if possible.
+		Sets a control on the device, if possible.
 
 		\throws string If device not started.
 		\throws string If an invalid control is specified.
 		\throws string If that control is not used on this device.
 		\throws string If it can't setthe value.
 
-		\param controlType The integer control to set.
+		\param controlType The control to set.
 		\param value The new brightness value.
 	*/
-	void videoDevice::setIntegerControlValue (const vdIntegerControl controlType, const int value) {
+	void videoDevice::setControlValue (const vdIntegerControl controlType, const int value) {
 		if(!live)
 			throw string("Device is not initialized.");
 
@@ -737,13 +737,14 @@ namespace vc {
 	}
 
 	/*!
-		Get what an integer control represents as a "string".
+		Get what a control represents as a "string".
 
 		\throws string On invalid control type.
 
+		\param control The control to get a name for.
 		\return The name of the control.
 	*/
-	string videoDevice::getIntegerControlString (const vdIntegerControl control) {
+	string videoDevice::getControlString (const vdIntegerControl control) {
 		switch(control) {
 			case BRIGHTNESS: return "Brightness";
 			case CONTRAST: return "Contrast";
@@ -764,7 +765,7 @@ namespace vc {
 
 		\return A vector of control types.
 	*/
-	vector <vdIntegerControl> videoDevice::getValidIntegerControls () {
+	vector <vdIntegerControl> videoDevice::getSupportedIntegerControls () {
 		if(!live)
 			throw string("Device is not initialized.");
 
@@ -773,15 +774,83 @@ namespace vc {
 
 		vector <vdIntegerControl> toReturn;
 
-		try { if(getIntegerControlUsed(BRIGHTNESS)) toReturn.push_back(BRIGHTNESS); } catch (string s) {}
-		try { if(getIntegerControlUsed(CONTRAST)) toReturn.push_back(CONTRAST); } catch (string s) {}
-		try { if(getIntegerControlUsed(SATURATION)) toReturn.push_back(SATURATION); } catch (string s) {}
-		try { if(getIntegerControlUsed(HUE)) toReturn.push_back(HUE); } catch (string s) {}
+		try { if(getControlSupported(BRIGHTNESS)) toReturn.push_back(BRIGHTNESS); } catch (string s) {}
+		try { if(getControlSupported(CONTRAST)) toReturn.push_back(CONTRAST); } catch (string s) {}
+		try { if(getControlSupported(SATURATION)) toReturn.push_back(SATURATION); } catch (string s) {}
+		try { if(getControlSupported(HUE)) toReturn.push_back(HUE); } catch (string s) {}
 
 		return toReturn;
 	}
 	/////////////////////////////// END INTEGER CONTROLS ////////////////////////
 
+	////////////////////////////////// DOUBLE CONTROLS //////////////////////////
+	bool videoDevice::getControlSupported (const vdDoubleControl) {
+		if(!live)
+				throw string("Device is not initialized.");
+
+		return false;
+	}
+
+	double videoDevice::getControlValue (const vdDoubleControl) {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		return 0.0;
+	}
+
+	double videoDevice::getControlMinimum (const vdDoubleControl) {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		return 0.0;
+	}
+
+	double videoDevice::getControlMaximum (const vdDoubleControl) {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		return 0.0;
+	}
+
+	double videoDevice::getControlStep (const vdDoubleControl) {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		return 0.0;
+	}
+
+	void videoDevice::setControlValue (const vdDoubleControl, const double) {
+		if(!live)
+			throw string("Device is not initialized.");
+	}
+
+	string videoDevice::getControlString(const vdDoubleControl control) {
+		return "UNSUPPORTED";
+	}
+
+	/*!
+		Gets all double controls that "should" work on this device.
+		No promises though.
+
+		\throws string If device not initialized.
+		\throws string If V4L2 - Not yet supported.
+
+		\todo Add V4L2 support.
+
+		\return A vector of control types.
+	*/
+	vector <vdDoubleControl> videoDevice::getSupportedDoubleControls() {
+		if(!live)
+			throw string("Device is not initialized.");
+
+		if(isV4L2)
+			throw string("V4L2 Not supported yet.");
+
+		vector <vdDoubleControl> toReturn;
+
+		return toReturn;
+	}
+	/////////////////////////////// END DOUBLE CONTROLS /////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////// Other /////////////////////////////////////

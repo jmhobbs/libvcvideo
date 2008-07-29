@@ -36,14 +36,17 @@ using std::pair;
 
 namespace vc {
 
-	/*!
-		These are all available integer type controls.
-	*/
-	enum vdIntegerControl {
+	//! These are all available integer type controls.
+	typedef enum vdIntegerControl {
 		BRIGHTNESS,
 		CONTRAST,
 		SATURATION,
 		HUE
+	};
+
+	//!
+	typedef enum vdDoubleControl {
+		DUMMY
 	};
 
 	/*!
@@ -63,17 +66,8 @@ namespace vc {
 			#endif
 
 			void init();
-			void getFrame(vdFrame &);
 
-			// Controls
-			bool getIntegerControlUsed(const vdIntegerControl);
-			int getIntegerControlValue(const vdIntegerControl);
-			int getIntegerControlMinimum(const vdIntegerControl);
-			int getIntegerControlMaximum(const vdIntegerControl);
-			int getIntegerControlStep(const vdIntegerControl);
-			void setIntegerControlValue(const vdIntegerControl, const int);
-			static string getIntegerControlString(const vdIntegerControl);
-			vector <vdIntegerControl> getValidIntegerControls();
+			void getFrame(vdFrame &);
 
 			string getCardName();
 
@@ -81,10 +75,32 @@ namespace vc {
 			vector < pair <int,int> > getValidDimensions();
 			pair <int,int> getDimensions();
 
+			////////////////////////// Controls //////////////////////////
+			bool getControlSupported (const vdIntegerControl);
+			bool getControlSupported (const vdDoubleControl);
 
+			int getControlValue (const vdIntegerControl);
+			double getControlValue (const vdDoubleControl);
 
-			// Static
+			int getControlMinimum (const vdIntegerControl);
+			double getControlMinimum (const vdDoubleControl);
 
+			int getControlMaximum (const vdIntegerControl);
+			double getControlMaximum (const vdDoubleControl);
+
+			int getControlStep (const vdIntegerControl);
+			double getControlStep (const vdDoubleControl);
+
+			void setControlValue (const vdIntegerControl, const int);
+			void setControlValue (const vdDoubleControl, const double);
+
+			static string getControlString(const vdIntegerControl);
+			static string getControlString(const vdDoubleControl);
+
+			vector <vdIntegerControl> getSupportedIntegerControls();
+			vector <vdDoubleControl> getSupportedDoubleControls();
+
+			// Static helpers
 			static vector <string> enumerateDevices ();
 
 		private:

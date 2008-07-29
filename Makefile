@@ -17,14 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with libvcvideo.  If not, see <http://www.gnu.org/licenses/>.
 
+MAJOR=1
+MINOR=0.2
+VERSION=$(MAJOR).$(MINOR)
+
 # Set capabilities...
-# ifeq ($(SIGCPP),NO)
-# 	SIGCPPCFLAGS =
-# 	SIGCPPLFLAGS =
-# else
+ifeq ($(SIGCPP),NO)
+	SIGCPPCFLAGS =
+	SIGCPPLFLAGS =
+else
 	SIGCPPCFLAGS = -DSIGCPP `pkg-config --cflags sigc++-2.0`
 	SIGCPPLFLAGS = `pkg-config --cflags --libs sigc++-2.0`
-# endif
+endif
 
 ifeq ($(VCDEBUG),YES)
 	DEBUGCFLAGS = -DVCVIDEO_DEBUG
@@ -60,16 +64,16 @@ GTKLFLAGS = `pkg-config gtkmm-2.4 --cflags --libs`
 release: dynamicLib plugins
 
 install: release
-	cp lib/libvcvideo.so.1.0.1 /usr/lib/ && \
-	mkdir -p /usr/include/libvcvideo && \
-	cp lib/videoDevice.h /usr/include/libvcvideo/ && \
-	cp lib/effects.h /usr/include/libvcvideo/ && \
-	cp lib/vdFrame.h /usr/include/libvcvideo/ && \
-	mkdir -p /usr/share/libvcvideo/effects/ && \
-	cp effects/*.so /usr/share/libvcvideo/effects/ && \
-	ldconfig -n /usr/lib/ && \
-	rm -f /usr/lib/libvcvideo.so && \
-	ln -s /usr/lib/libvcvideo.so.1 /usr/lib/libvcvideo.so
+	cp lib/libvcvideo.so.$(VERSION) /usr/lib/
+	mkdir -p /usr/include/libvcvideo
+	cp lib/videoDevice.h /usr/include/libvcvideo/
+	cp lib/effects.h /usr/include/libvcvideo/
+	cp lib/vdFrame.h /usr/include/libvcvideo/
+	mkdir -p /usr/share/libvcvideo/effects/
+	cp effects/*.so /usr/share/libvcvideo/effects/
+	ldconfig -n /usr/lib/
+	rm -f /usr/lib/libvcvideo.so
+	ln -s /usr/lib/libvcvideo.so.$(MAJOR) /usr/lib/libvcvideo.so
 
 # Other targets
 bins: vcvTest gtkTest effectInformation
@@ -101,7 +105,7 @@ staticLib: lib/videoDevice.o lib/effects.o
 
 # Create a dynamic library
 dynamicLib: lib/videoDevice.o lib/effects.o
-	$(COMPILER) $(LFLAGS) -shared -Wl,-soname,libvcvideo.so.1 -lc -o lib/libvcvideo.so.1.0.1 lib/videoDevice.o lib/effects.o
+	$(COMPILER) $(LFLAGS) -shared -Wl,-soname,libvcvideo.so.$(MAJOR) -lc -o lib/libvcvideo.so.$(VERSION) lib/videoDevice.o lib/effects.o
 
 .PHONY: docs clean
 
@@ -126,7 +130,7 @@ spotless: clean
 	@rm -f effects/*.so
 	@rm -f lib/*.so
 	@rm -f lib/*.a
-	@rm -f lib/libvcvideo.so.1.0.1
+	@rm -f lib/libvcvideo.so.$(VERSION)
 
 # Object targets
 .SUFFIXES : .cpp .o .h

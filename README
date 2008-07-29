@@ -13,7 +13,7 @@ libvcvideo is released under the GNU Public License v3.
 
 A modern kernel with V4L.
 A compatible video device.
-glib (for effects)
+glib (for effects, need gmodule)
 libsigc++ (optional)
 libmagick++ (optional, for example programs)
 gtkmm (optional, for example programs)
