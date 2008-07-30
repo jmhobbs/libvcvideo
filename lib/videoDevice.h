@@ -37,7 +37,7 @@ using std::pair;
 namespace vc {
 
 	//! These are all available integer type controls.
-	typedef enum vdIntegerControl {
+	enum vdIntegerControl {
 		BRIGHTNESS,
 		CONTRAST,
 		SATURATION,
@@ -45,7 +45,7 @@ namespace vc {
 	};
 
 	//!
-	typedef enum vdDoubleControl {
+	enum vdDoubleControl {
 		DUMMY
 	};
 

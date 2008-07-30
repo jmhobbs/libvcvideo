@@ -76,7 +76,7 @@ install: release
 	ln -s /usr/lib/libvcvideo.so.$(MAJOR) /usr/lib/libvcvideo.so
 
 # Other targets
-bins: vcvTest gtkTest effectInformation
+bins: vcvTest gtkTest effectInformation gtkEffectTest
 
 # Dynamic linked test
 bin/dynTest.o: bin/dynTest.cpp
@@ -94,6 +94,10 @@ vcvTest: $(TRGT_BIN_PLAIN)
 TRGT_BIN_GTK = lib/videoDevice.o bin/gtkTest.o
 gtkTest: $(TRGT_BIN_GTK)
 	$(COMPILER) $(GTKLFLAGS) $(TRGT_BIN_GTK) -o bin/$@
+
+TRGT_BIN_GTK_EFFECT = lib/videoDevice.o bin/gtkEffectTest.o lib/effects.o
+gtkEffectTest: $(TRGT_BIN_GTK_EFFECT)
+	$(COMPILER) $(GTKLFLAGS) $(TRGT_BIN_GTK_EFFECT) -o bin/$@
 
 TRGT_BIN_EFFECT = bin/effectInformation.o lib/effects.o
 effectInformation: $(TRGT_BIN_EFFECT)
@@ -147,8 +151,10 @@ depend:
 include dependency.mk
 
 # Special case dependencies
-TRGT_BIN_GTKTEST_O = bin/gtkTest.cpp lib/videoDevice.h
-bin/gtkTest.o: $(TRGT_BIN_GTKTEST_O)
+bin/gtkTest.o: bin/gtkTest.cpp lib/videoDevice.h
+	$(COMPILER) $(GTKCFLAGS) -c $< -o $@
+
+bin/gtkEffectTest.o: bin/gtkEffectTest.cpp lib/videoDevice.h lib/effects.h
 	$(COMPILER) $(GTKCFLAGS) -c $< -o $@
 
 bin/vcvTest.o: bin/vcvTest.cpp lib/videoDevice.h
