@@ -35,7 +35,7 @@ namespace vc {
 
 		\return The number of effects added to the registry.
 	*/
-	int effects::populateRegistry (vc::vdFrame & initFrame) {
+	int effects::populateRegistry () {
 		DIR *dp;
 		struct dirent *ep;
 		int effectsAdded = 0;
@@ -48,7 +48,7 @@ namespace vc {
 				len = strlen(ep->d_name);
 				if('o' == ep->d_name[len-1] && 's' == ep->d_name[len-2]) { //! \todo UGLY
 					try{
-						registerEffect(std::string(EFFECT_INSTALL_PATH)+ep->d_name,initFrame);
+						registerEffect(std::string(EFFECT_INSTALL_PATH)+ep->d_name);
 						++effectsAdded;
 					}
 					catch (std::string s) {
@@ -72,7 +72,7 @@ namespace vc {
 
 		\param filename The path to the plugin.
 	*/
-	void effects::registerEffect (std::string filename, vc::vdFrame & initFrame) {
+	void effects::registerEffect (std::string filename) {
 
 		effect tempEffect;
 
