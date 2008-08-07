@@ -10,9 +10,11 @@ int main (int argc, char ** argv) {
 
 	vc::effects * eff = vc::effects::instance();
 
+	vc::vdFrame dummyInitFrame;
+
 	int loaded;
 	try {
-		loaded = eff->populateRegistry();
+		loaded = eff->populateRegistry(dummyInitFrame);
 	}
 	catch (std::string s) {
 		std::cerr << "Error loading effects: " << s << std::endl;

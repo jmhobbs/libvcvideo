@@ -130,6 +130,7 @@ spotless: clean
 	@rm -f bin/gtkTest
 	@rm -f bin/dynTest
 	@rm -f bin/effectInformation
+	@rm -f bin/gtkEffectTest
 	@rm -rf docs/html/*
 	@rm -f effects/*.so
 	@rm -f lib/*.so
@@ -164,7 +165,8 @@ bin/effectInformation.o: bin/effectInformation.cpp lib/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
 # Included plugins
-plugins: effects/example.so effects/testPattern.so effects/mirror.so effects/vmirror.so
+effects: plugins # Alias
+plugins: effects/example.so effects/testPattern.so effects/mirror.so effects/vmirror.so effects/quantum.so
 
 lib/effects.o: lib/effects.cpp lib/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
@@ -179,4 +181,7 @@ effects/mirror.so: effects/mirror.o
 	$(CC) $(EFFECTFLAGS) $< -o $@
 
 effects/vmirror.so: effects/vmirror.o
+	$(CC) $(EFFECTFLAGS) $< -o $@
+
+effects/quantum.so: effects/quantum.o
 	$(CC) $(EFFECTFLAGS) $< -o $@

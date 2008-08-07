@@ -30,7 +30,7 @@ namespace vc {
 
 		\return The number of effects added to the registry.
 	*/
-	int effects::populateRegistry () {
+	int effects::populateRegistry (vc::vdFrame & initFrame) {
 		DIR *dp;
 		struct dirent *ep;
 		int effectsAdded = 0;
@@ -41,9 +41,9 @@ namespace vc {
 			int len;
 			while(ep != NULL) {
 				len = strlen(ep->d_name);
-				if('o' == ep->d_name[len-1] && 's' == ep->d_name[len-2]) {
+				if('o' == ep->d_name[len-1] && 's' == ep->d_name[len-2]) { //! \todo UGLY
 					try{
-						registerEffect(std::string(EFFECT_INSTALL_PATH)+ep->d_name);
+						registerEffect(std::string(EFFECT_INSTALL_PATH)+ep->d_name,initFrame);
 						++effectsAdded;
 					}
 					catch (std::string s) {
@@ -67,7 +67,7 @@ namespace vc {
 
 		\param filename The path to the plugin.
 	*/
-	void effects::registerEffect (std::string filename) {
+	void effects::registerEffect (std::string filename, vc::vdFrame & initFrame) {
 
 		effect tempEffect;
 
@@ -153,6 +153,8 @@ namespace vc {
 			g_module_close(module);
 			throw std::string("Arguments symbol is NULL.");
 		}
+
+		tempEffect.init(initFrame);
 
 		registeredEffects.insert(std::pair<std::string,effect>(tempEffect.name(),tempEffect));
 		g_module_make_resident(module);

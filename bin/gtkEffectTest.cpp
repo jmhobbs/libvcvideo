@@ -138,8 +138,9 @@ class Viewer : public Gtk::Window {
 				vbox.pack_start(shue,false,false,0);
 			}
 
+			vd.getFrame(frame);
 			fx = vc::effects::instance();
-			fx->populateRegistry();
+			fx->populateRegistry(frame);
 			std::vector<std::string> effectsByName = fx->getEffectNames();
 			effectsCombo.append_text("--[Select Effect]--");
 			for(std::vector<std::string>::iterator it = effectsByName.begin(); it != effectsByName.end(); ++it)
