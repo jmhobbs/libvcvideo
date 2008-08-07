@@ -154,8 +154,6 @@ namespace vc {
 			throw std::string("Arguments symbol is NULL.");
 		}
 
-		tempEffect.init(initFrame);
-
 		registeredEffects.insert(std::pair<std::string,effect>(tempEffect.name(),tempEffect));
 		g_module_make_resident(module);
 
