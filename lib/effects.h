@@ -42,8 +42,8 @@ namespace vc {
 		public:
 			static effects * instance ();
 
-			int populateRegistry (vc::vdFrame &);
-			void registerEffect (std::string, vc::vdFrame &);
+			int populateRegistry ();
+			void registerEffect (std::string);
 
 			std::vector<std::string> getEffectNames ();
 
@@ -61,6 +61,7 @@ namespace vc {
 			effects ();
 			effects (const effects &);
 			effects & operator= (const effects &);
+			~effects ();
 
 		private:
 			static effects * pinstance;

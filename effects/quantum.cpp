@@ -19,12 +19,16 @@ extern "C" double effect_version () { return 1.0; }
 extern "C" bool effect_init (vc::vdFrame & initFrame) {
 	for(int i = 0; i < 8; i++)
 		libvcvideo_effect_quantum_frames[i] = initFrame;
+	libvcvideo_effect_quantum_counter = 0;
 	return true;
 }
 
 extern "C" bool effect_deinit () { return true; }
 
 extern "C" void effect_apply (vc::vdFrame & frame, std::vector<vc::effectArgument> args) {
+
+		if(libvcvideo_effect_quantum_frames[libvcvideo_effect_quantum_counter].bufferSize != frame.bufferSize)
+			effect_init(frame);
 
 		libvcvideo_effect_quantum_frames[libvcvideo_effect_quantum_counter] = frame;
 

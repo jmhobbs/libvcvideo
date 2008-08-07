@@ -21,6 +21,10 @@ extern "C" double effect_version () { return 1.0; }
 /*
 	The rest of these are the real workers. If you have any global data you need
 	to initialize, use the effect_init. Likewise on deinitialization.
+
+	THIS IS NOT CALLED AUTOMATICALLY! You must check in effect_apply that you have
+	been initialized and do so if needed. This is so that if frame sizes, or
+	anything else you might care about, changes you can re-initialize.
 */
 extern "C" bool effect_init (vc::vdFrame & initFrame) { return true; }
 extern "C" bool effect_deinit () { return true; }

@@ -284,6 +284,9 @@
 	path to the plugins in the \link vc::effects::registerEffect effects::registerEffect \endlink
 	method.
 
+	You may use the \link vc::effects::populateRegistry effects::populateRegistry \endlink to
+	load all the plugins that are in the default installation path, usually /usr/share/libvcvideo/effects/.
+
 	Once sucessfully registered you may use an effect by passing the active frame
 	to the \link vc::effects::applyEffect effects::applyEffect \endlink method.
 

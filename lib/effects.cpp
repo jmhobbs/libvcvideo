@@ -20,6 +20,11 @@ namespace vc {
 		return pinstance;
 	}
 
+	effects::~effects () {
+		for(std::map<std::string,effect>::iterator it = registeredEffects.begin() ; it != registeredEffects.end(); it++ )
+    	it->second.deinit();
+	}
+
 	effects::effects () { /* Nothing to do... */ }
 
 	/*!
