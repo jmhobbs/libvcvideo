@@ -166,7 +166,8 @@ bin/effectInformation.o: bin/effectInformation.cpp lib/effects.h
 
 # Included plugins
 effects: plugins # Alias
-plugins: effects/example.so effects/testPattern.so effects/mirror.so effects/vmirror.so effects/quantum.so
+plugins: effects/example.so effects/testPattern.so effects/mirror.so \
+effects/vmirror.so effects/quantum.so effects/pixelLapse.so
 
 lib/effects.o: lib/effects.cpp lib/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
@@ -184,4 +185,7 @@ effects/vmirror.so: effects/vmirror.o
 	$(CC) $(EFFECTFLAGS) $< -o $@
 
 effects/quantum.so: effects/quantum.o
+	$(CC) $(EFFECTFLAGS) $< -o $@
+
+effects/pixelLapse.so: effects/pixelLapse.o
 	$(CC) $(EFFECTFLAGS) $< -o $@
