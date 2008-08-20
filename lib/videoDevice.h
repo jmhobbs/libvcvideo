@@ -34,6 +34,9 @@ using std::pair;
 
 #include "lib/vdFrame.h"
 
+// 6 is an arbitrary magic number
+#define VC_V4L2_MAX_INPUTS 6
+
 namespace vc {
 
 	//! These are all available integer type controls.
@@ -119,9 +122,7 @@ namespace vc {
 
 			v4l2_capability v2_capabilities;
 
-			// 6 is an arbitrary magic number
-			#define MAX_INPUTS 6
-			v4l2_input v2_inputs[MAX_INPUTS];
+			v4l2_input v2_inputs[VC_V4L2_MAX_INPUTS];
 			int inputCount;
 			int currentInput;
 
@@ -132,6 +133,9 @@ namespace vc {
 			v4l2_queryctrl saturation;
 			v4l2_queryctrl hue;
 
+			v4l2_format format;
+
+			/////////////////////////////////////////////////////////////////////////
 			// V4L1
 			video_capability v1_capabilities;
 			video_channel v1_inputs[MAX_INPUTS];
@@ -141,6 +145,7 @@ namespace vc {
 			vector < pair <int,int> > capableDimensions;
 			unsigned int bufferSize;
 
+			/////////////////////////////////////////////////////////////////////////
 			// Format converters
 			void fmt_VIDEO_PALETTE_RGB24(vdFrame &);
 	};

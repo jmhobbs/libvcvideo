@@ -56,6 +56,7 @@ namespace vc {
 		\todo Get better error strings from ioctl and stuff.
 
 		\throws string Descriptive error string.
+		\throws string Pass through from v2_init() and v1_init()
 	*/
 	void videoDevice::init () {
 		if(live)
@@ -96,6 +97,7 @@ namespace vc {
 		\throw string On any initialization error.
 	*/
 	void videoDevice::v2_init () {
+
 		if(!(v2_capabilities.capabilities & V4L2_CAP_VIDEO_CAPTURE))
 			throw string("Device '"+deviceName+" not a video capture device.");
 
@@ -140,25 +142,69 @@ namespace vc {
 		// Since we are starting with USB cameras they set v4l2_input std to 0
 		// If it isn't, we bail out.
 		if(0 != v2_inputs[currentInput].std)
-			throw string("Not a USB web camera.");
+			throw string("Device '"+deviceName+"' not a USB web camera.");
 
 		// Enumerate input controls
 		// http://v4l2spec.bytesex.org/spec/x542.htm
 		brightness.id = V4L2_CID_BRIGHTNESS;
-		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,brightness))
-			throw string("Could not get control value for brightness.");
+		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,brightness)) {
+			brightness.flags = V4L2_CTRL_FLAG_DISABLED;
+			#ifdef VCVIDEO_DEBUG
+			cerr << "Could not get control value for brightness." << end;
+			#endif
+			//throw string("Could not get control value for brightness.");
+		}
 
 		contrast.id = V4L2_CID_CONTRAST;
-		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,contrast))
-			throw string("Could not get control value for contrast.");
+		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,contrast)) {
+			contrast.flags = V4L2_CTRL_FLAG_DISABLED;
+			#ifdef VCVIDEO_DEBUG
+			cerr << "Could not get control value for contrast." << end;
+			#endif
+			//throw string("Could not get control value for contrast.");
+		}
 
 		saturation.id = V4L2_CID_SATURATION;
-		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,saturation))
-			throw string("Could not get control value for saturation.");
+		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,saturation)) {
+			saturation.flags = V4L2_CTRL_FLAG_DISABLED;
+			#ifdef VCVIDEO_DEBUG
+			cerr << "Could not get control value for saturation." << end;
+			#endif
+			//throw string("Could not get control value for saturation.");
+		}
 
 		hue.id = V4L2_CID_HUE;
-		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,hue))
-			throw string("Could not get control value for hue.");
+		if(-1 == ioctl(fd,VIDIOC_QUERYCTRL,hue)) {
+			hue.flags = V4L2_CTRL_FLAG_DISABLED;
+			#ifdef VCVIDEO_DEBUG
+			cerr << "Could not get control value for hue." << end;
+			#endif
+			//throw string("Could not get control value for hue.");
+		}
+
+		// Extended controls...?
+
+		// Format negotiation
+		format.type = currentInput.type;
+		if(-1 == ioctl(fd,VIDIOC_G_FMT,format))
+			throw string("Could not access available output formats.");
+
+		//! \todo Enumerate possible formats here, right now just take what we are given
+		#ifdef VCVIDEO_DEBUG
+		cerr << "Format - FourCC: " << char * (format.pixelformat) << endl;
+		{
+			v4l2_fmtdesc fmtDesc;
+			fmtDesc.index = 1;
+			fmtDesc.pixelformat = format.pixelformat;
+			if(-1 != ioctl(fd,VIDIOC_ENUM_FMT,fmtDesc))
+				cerr << "Format -   Name: " << fmtDesc.description << endl;
+		}
+		#endif
+
+		//! \todo Cropping/Scaling
+
+		//! \todo Streaming parameters
+		// High quality mode? VIDIOC_S_PARM - V4L2_MODE_HIGHQUALITY
 
 		//! \todo Finish this.
 		throw string("V4L2 Not yet supported.");
