@@ -32,10 +32,11 @@ using std::string;
 using std::vector;
 using std::pair;
 
-#include "lib/vdFrame.h"
+#include "vdFrame.h"
 
 // 6 is an arbitrary magic number
 #define VC_V4L2_MAX_INPUTS 6
+#define VC_V4L_MAX_INPUTS 6
 
 namespace vc {
 
@@ -138,7 +139,7 @@ namespace vc {
 			/////////////////////////////////////////////////////////////////////////
 			// V4L1
 			video_capability v1_capabilities;
-			video_channel v1_inputs[MAX_INPUTS];
+			video_channel v1_inputs[VC_V4L_MAX_INPUTS];
 			video_picture v1_controls;
 			video_window v1_window;
 

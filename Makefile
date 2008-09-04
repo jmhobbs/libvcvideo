@@ -18,7 +18,7 @@
 # along with libvcvideo.  If not, see <http://www.gnu.org/licenses/>.
 
 MAJOR=1
-MINOR=0.2
+MINOR=2
 VERSION=$(MAJOR).$(MINOR)
 
 # Set capabilities...
@@ -46,7 +46,7 @@ endif
 
 # Compiler setup
 CC = g++
-CFLAGS = -Wall -g -fPIC -I. $(DEBUGCFLAGS) $(SIGCPPCFLAGS)
+CFLAGS = -Wall -g -fPIC -I. -I lib/ $(DEBUGCFLAGS) $(SIGCPPCFLAGS)
 LFLAGS = -Wall $(SIGCPPLFLAGS)
 
 COMPILER = $(CC) $(CFLAGS)
@@ -54,7 +54,6 @@ COMPILER = $(CC) $(CFLAGS)
 GMODULECFLAGS = `pkg-config gmodule-2.0 --cflags`
 GMODULEFLAGS = `pkg-config gmodule-2.0 --libs`
 
-# Effect plugins setup
 EFFECTFLAGS = -shared -lc
 
 GTKCFLAGS = `pkg-config gtkmm-2.4 --cflags`
@@ -145,9 +144,9 @@ spotless: clean
 
 depend:
 	@echo '# Do not change this file unless you know what you are doing. Use make depend instead.' > dependency.mk
-	g++ -I. -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
-	g++ -I. -MM bin/*.cpp | sed 's/^\([a-zA-Z]\)/\nbin\/\1/' >> dependency.mk
-	g++ -I. -MM effects/*.cpp | sed 's/^\([a-zA-Z]\)/\neffects\/\1/' >> dependency.mk
+	g++ -I. -I lib/ -MM lib/*.cpp | sed 's/^\([a-zA-Z]\)/\nlib\/\1/' >> dependency.mk
+	g++ -I. -I lib/ -MM bin/*.cpp | sed 's/^\([a-zA-Z]\)/\nbin\/\1/' >> dependency.mk
+	g++ -I. -I lib/ -MM effects/*.cpp | sed 's/^\([a-zA-Z]\)/\neffects\/\1/' >> dependency.mk
 
 include dependency.mk
 
@@ -165,7 +164,7 @@ bin/effectInformation.o: bin/effectInformation.cpp lib/effects.h
 	$(COMPILER) $(GMODULECFLAGS) -c $< -o $@
 
 # Included plugins
-effects: plugins # Alias
+effects: plugins
 plugins: effects/example.so effects/testPattern.so effects/mirror.so \
 effects/vmirror.so effects/quantum.so effects/pixelLapse.so
 

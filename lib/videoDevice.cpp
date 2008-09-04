@@ -34,7 +34,7 @@
 	using std::endl;
 #endif
 
-#include "lib/videoDevice.h"
+#include "videoDevice.h"
 
 namespace vc {
 
@@ -118,7 +118,7 @@ namespace vc {
 		#ifdef VCVIDEO_DEBUG
 		cerr << "----[Enumerate Inputs]----------------------------" << endl;
 		#endif
-		for(int i = 0; i < MAX_INPUTS; i++) {
+		for(int i = 0; i < VC_V4L2_MAX_INPUTS; i++) {
 			v2_inputs[i].index = i;
 			if(-1 == ioctl(fd,VIDIOC_ENUMINPUT,&v2_inputs[i]))
 				break;
@@ -185,9 +185,10 @@ namespace vc {
 		// Extended controls...?
 
 		// Format negotiation
-		format.type = currentInput.type;
-		if(-1 == ioctl(fd,VIDIOC_G_FMT,format))
-			throw string("Could not access available output formats.");
+		//! \todo FIXME
+// 		format.type = currentInput.type;
+// 		if(-1 == ioctl(fd,VIDIOC_G_FMT,format))
+// 			throw string("Could not access available output formats.");
 
 		//! \todo Enumerate possible formats here, right now just take what we are given
 		#ifdef VCVIDEO_DEBUG
@@ -246,7 +247,7 @@ namespace vc {
 		cerr << "----[Enumerate Channels]--------------------------" << endl;
 		#endif
 		// Check out the inputs ("channels") on the card
-		for(int i = 0; i < v1_capabilities.channels && i < MAX_INPUTS; i++) {
+		for(int i = 0; i < v1_capabilities.channels && i < VC_V4L_MAX_INPUTS; i++) {
 			v1_inputs[i].channel = i;
 			if(-1 == ioctl(fd,VIDIOCGCHAN,&v1_inputs[i]))
 				break;
